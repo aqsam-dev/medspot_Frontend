@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import MainLayout from "../../components/layout/MainLayout";
+import AccountLayout from "../../components/layout/AccountLayout";
 import PharmacyInfoCard from "../../components/profile/pharmacyinfocard";
 import PharmacistInfoCard from "../../components/profile/pharmacistinfocard";
 import CredentialsCard from "../../components/profile/credentialscard";
@@ -38,7 +38,7 @@ export default function PharmacyProfile() {
   if (!profile) return null;
 
   return (
-    <MainLayout
+    < AccountLayout
       headerProps={{
         title: "Pharmacy Profile",
         subtitle: "Manage pharmacy information"
@@ -89,6 +89,6 @@ export default function PharmacyProfile() {
           onClose={() => setShowPassword(false)}
         />
       )}
-    </MainLayout>
+    </AccountLayout>
   );
 }

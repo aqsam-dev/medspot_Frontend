@@ -24,12 +24,32 @@ export default function Header({
   );
 
   const [showMenu, setShowMenu] = useState(false);
+  const [showNotifications, setShowNotifications] =
+    useState(false);
 
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
   );
 
-  const unreadNotifications = 3; // replace with API later
+  const unreadNotifications = 3;
+
+  const notifications = [
+    {
+      id: 1,
+      title: "Prescription #104 approved",
+      time: "2 min ago",
+    },
+    {
+      id: 2,
+      title: "Inventory synced successfully",
+      time: "10 min ago",
+    },
+    {
+      id: 3,
+      title: "New reservation received",
+      time: "25 min ago",
+    },
+  ];
 
   useEffect(() => {
     document.documentElement.classList.toggle(
@@ -46,14 +66,13 @@ export default function Header({
   useEffect(() => {
     function handleOutsideClick() {
       setShowMenu(false);
+      setShowNotifications(false);
     }
 
-    if (showMenu) {
-      document.addEventListener(
-        "click",
-        handleOutsideClick
-      );
-    }
+    document.addEventListener(
+      "click",
+      handleOutsideClick
+    );
 
     return () => {
       document.removeEventListener(
@@ -61,7 +80,7 @@ export default function Header({
         handleOutsideClick
       );
     };
-  }, [showMenu]);
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("token");
@@ -109,18 +128,70 @@ export default function Header({
         </button>
 
         {/* Notifications */}
-        <button
-          onClick={() => navigate("/notifications")}
-          className="relative w-10 h-10 rounded-xl border bg-white hover:bg-gray-100 flex items-center justify-center transition shadow-sm"
+        <div
+          className="relative"
+          onClick={(e) => e.stopPropagation()}
         >
-          <Bell size={18} />
+          <button
+            onClick={() =>
+              setShowNotifications(
+                !showNotifications
+              )
+            }
+            className="relative w-10 h-10 rounded-xl border bg-white hover:bg-gray-100 flex items-center justify-center transition shadow-sm"
+          >
+            <Bell size={18} />
 
-          {unreadNotifications > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center px-1">
-              {unreadNotifications}
-            </span>
+            {unreadNotifications > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center px-1">
+                {unreadNotifications}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-80 bg-white border rounded-2xl shadow-xl overflow-hidden z-50">
+              <div className="px-4 py-3 border-b bg-gray-50">
+                <h3 className="font-semibold text-sm">
+                  Notifications
+                </h3>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length > 0 ? (
+                  notifications.map((item) => (
+                    <div
+                      key={item.id}
+                      className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
+                    >
+                      <p className="text-sm font-medium">
+                        {item.title}
+                      </p>
+
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.time}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-sm text-gray-500">
+                    No notifications
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowNotifications(false);
+                  navigate("/notifications");
+                }}
+                className="w-full py-3 text-blue-600 font-medium hover:bg-blue-50 border-t"
+              >
+                View All Notifications
+              </button>
+            </div>
           )}
-        </button>
+        </div>
 
         {/* Profile Dropdown */}
         <div
@@ -142,12 +213,8 @@ export default function Header({
                 {pharmacy?.pharmacy_name}
               </p>
 
-              <p className="text-[11px] text-green-600 font-medium">
-                ● POS Connected
-              </p>
             </div>
 
-            {/* Avatar */}
             <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold border">
               {pharmacy?.pharmacy_name?.[0]?.toUpperCase() ||
                 "P"}
@@ -158,23 +225,8 @@ export default function Header({
 
           {showMenu && (
             <div className="absolute right-0 mt-3 w-64 bg-white border rounded-2xl shadow-xl overflow-hidden z-50">
-              {/* User Info */}
-              <div className="px-4 py-4 border-b bg-gray-50">
-                <p className="font-semibold text-sm">
-                  {pharmacy?.owner_name}
-                </p>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  {pharmacy?.owner_email}
-                </p>
-
-                <div className="mt-2 text-xs font-medium text-green-600">
-                  ● Connected to MedSpot
-                </div>
-              </div>
 
               {/* Menu */}
-
               <button
                 onClick={() =>
                   navigateTo("/profile")
