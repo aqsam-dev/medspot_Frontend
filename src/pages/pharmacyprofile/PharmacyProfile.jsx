@@ -1,19 +1,36 @@
 import { useEffect, useState } from "react";
+
 import AccountLayout from "../../components/layout/AccountLayout";
-import PharmacyInfoCard from "../../components/profile/pharmacyinfocard";
+import PharmacyBasicInfoCard from "../../components/profile/pharmacybasicinfocard";
+import AddressLocationCard from "../../components/profile/addresslocationcard";
+import OperatingHoursCard from "../../components/profile/operatinghourscard";
 import PharmacistInfoCard from "../../components/profile/pharmacistinfocard";
 import CredentialsCard from "../../components/profile/credentialscard";
-import EditProfileModal from "../../components/profile/editprofilemodal";
+
+import EditBasicInfoModal from "../../components/profile/editbasicinfomodal";
+import EditAddressModal from "../../components/profile/editaddresslocationmodal";
+import EditOperatingHoursModal from "../../components/profile/editoperatinghoursmodal";
+import EditPharmacistModal from "../../components/profile/editpharmacistinfomodal";
+
 import ChangeUsernameModal from "../../components/profile/changeusernamemodal";
 import ChangePasswordModal from "../../components/profile/changepasswordmodal";
-import pharmacyService from "../../services/pharmacyprofileservice";
+
+import pharmacyProfileService from "../../services/pharmacyprofileservice";
 
 export default function PharmacyProfile() {
   const [profile, setProfile] = useState(null);
 
-  const [showEdit, setShowEdit] = useState(false);
-  const [showUsername, setShowUsername] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showBasicModal, setShowBasicModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showHoursModal, setShowHoursModal] = useState(false);
+  const [showPharmacistModal, setShowPharmacistModal] =
+    useState(false);
+
+  const [showUsernameModal, setShowUsernameModal] =
+    useState(false);
+
+  const [showPasswordModal, setShowPasswordModal] =
+    useState(false);
 
   const loadProfile = async () => {
     try {
@@ -21,13 +38,16 @@ export default function PharmacyProfile() {
         localStorage.getItem("pharmacyData")
       );
 
-      const data = await pharmacyService.getProfile(
-        pharmacy.pharmacy_id
-      );
+      if (!pharmacy?.pharmacy_id) return;
+
+      const data =
+        await pharmacyProfileService.getProfile(
+          pharmacy.pharmacy_id
+        );
 
       setProfile(data);
     } catch (err) {
-      console.error(err);
+      console.error("Profile Load Error:", err);
     }
   };
 
@@ -35,58 +55,142 @@ export default function PharmacyProfile() {
     loadProfile();
   }, []);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <AccountLayout
+        headerProps={{
+          title: "Pharmacy Profile",
+          subtitle: "Loading..."
+        }}
+      >
+        <div>Loading profile...</div>
+      </AccountLayout>
+    );
+  }
 
   return (
-    < AccountLayout
+    <AccountLayout
       headerProps={{
         title: "Pharmacy Profile",
-        subtitle: "Manage pharmacy information"
+        subtitle:
+          "Manage pharmacy information and credentials"
       }}
     >
       <div className="space-y-6">
 
-        <PharmacyInfoCard
+        {/* CARD 1 */}
+        <PharmacyBasicInfoCard
           profile={profile}
-          onEdit={() => setShowEdit(true)}
+          onEdit={() => setShowBasicModal(true)}
         />
 
+        {/* CARD 2 */}
+        <AddressLocationCard
+          profile={profile}
+          onEdit={() => setShowAddressModal(true)}
+        />
+
+        {/* CARD 3 */}
+        <OperatingHoursCard
+          profile={profile}
+          onEdit={() => setShowHoursModal(true)}
+        />
+
+        {/* CARD 4 */}
         <PharmacistInfoCard
           profile={profile}
+          onEdit={() => setShowPharmacistModal(true)}
         />
 
+        {/* CARD 5 */}
         <CredentialsCard
           profile={profile}
           onChangeUsername={() =>
-            setShowUsername(true)
+            setShowUsernameModal(true)
           }
           onChangePassword={() =>
-            setShowPassword(true)
+            setShowPasswordModal(true)
           }
         />
-
       </div>
 
-      {showEdit && (
-        <EditProfileModal
+      {/* BASIC INFO MODAL */}
+      {showBasicModal && (
+        <EditBasicInfoModal
           profile={profile}
-          onClose={() => setShowEdit(false)}
-          onSuccess={loadProfile}
+          onClose={() =>
+            setShowBasicModal(false)
+          }
+          onSuccess={() => {
+            setShowBasicModal(false);
+            loadProfile();
+          }}
         />
       )}
 
-      {showUsername && (
+      {/* ADDRESS MODAL */}
+      {showAddressModal && (
+        <EditAddressModal
+          profile={profile}
+          onClose={() =>
+            setShowAddressModal(false)
+          }
+          onSuccess={() => {
+            setShowAddressModal(false);
+            loadProfile();
+          }}
+        />
+      )}
+
+      {/* OPERATING HOURS MODAL */}
+      {showHoursModal && (
+        <EditOperatingHoursModal
+          profile={profile}
+          onClose={() =>
+            setShowHoursModal(false)
+          }
+          onSuccess={() => {
+            setShowHoursModal(false);
+            loadProfile();
+          }}
+        />
+      )}
+
+      {/* PHARMACIST MODAL */}
+      {showPharmacistModal && (
+        <EditPharmacistModal
+          profile={profile}
+          onClose={() =>
+            setShowPharmacistModal(false)
+          }
+          onSuccess={() => {
+            setShowPharmacistModal(false);
+            loadProfile();
+          }}
+        />
+      )}
+
+      {/* USERNAME */}
+      {showUsernameModal && (
         <ChangeUsernameModal
           profile={profile}
-          onClose={() => setShowUsername(false)}
-          onSuccess={loadProfile}
+          onClose={() =>
+            setShowUsernameModal(false)
+          }
+          onSuccess={() => {
+            setShowUsernameModal(false);
+            loadProfile();
+          }}
         />
       )}
 
-      {showPassword && (
+      {/* PASSWORD */}
+      {showPasswordModal && (
         <ChangePasswordModal
           profile={profile}
-          onClose={() => setShowPassword(false)}
+          onClose={() =>
+            setShowPasswordModal(false)
+          }
         />
       )}
     </AccountLayout>

@@ -1,9 +1,10 @@
 import {
+  Building2,
   User,
-  GraduationCap,
   Mail,
-  CreditCard,
-  FileBadge2,
+  Phone,
+  FileText,
+  Calendar,
   Pencil
 } from "lucide-react";
 
@@ -12,6 +13,7 @@ function Info({ icon, label, value }) {
     <div className="bg-gray-50 border rounded-xl p-4">
       <div className="flex items-center gap-2 mb-2">
         {icon}
+
         <span className="text-xs uppercase text-gray-500">
           {label}
         </span>
@@ -24,11 +26,11 @@ function Info({ icon, label, value }) {
   );
 }
 
-export default function PharmacistInfoCard({
+export default function PharmacyBasicInfoCard({
   profile,
   onEdit
 }) {
-  const licenseUrl = profile.pharmacist_license;
+  const licenseUrl = profile.license_url;
 
   const isPdf =
     licenseUrl?.toLowerCase().includes(".pdf");
@@ -37,13 +39,14 @@ export default function PharmacistInfoCard({
     <div className="bg-white rounded-2xl border shadow-sm">
 
       <div className="flex justify-between items-center p-6 border-b">
+
         <div>
           <h2 className="text-xl font-semibold">
-            Pharmacist Information
+            Pharmacy Basic Information
           </h2>
 
           <p className="text-sm text-gray-500">
-            Registered pharmacist details
+            Registration information
           </p>
         </div>
 
@@ -51,13 +54,16 @@ export default function PharmacistInfoCard({
           onClick={onEdit}
           className="
             flex items-center gap-2
-            bg-blue-600 text-white
-            px-4 py-2 rounded-xl
+            px-4 py-2
+            bg-blue-600
+            text-white
+            rounded-xl
           "
         >
           <Pencil size={16} />
           Edit
         </button>
+
       </div>
 
       <div className="p-6">
@@ -65,27 +71,39 @@ export default function PharmacistInfoCard({
         <div className="grid md:grid-cols-2 gap-4">
 
           <Info
+            icon={<Building2 size={16} />}
+            label="Pharmacy Name"
+            value={profile.pharmacy_name}
+          />
+
+          <Info
             icon={<User size={16} />}
-            label="Full Name"
-            value={profile.pharmacist_name}
-          />
-
-          <Info
-            icon={<GraduationCap size={16} />}
-            label="Qualification"
-            value={profile.qualification}
-          />
-
-          <Info
-            icon={<CreditCard size={16} />}
-            label="CNIC"
-            value={profile.pharmacist_cnic}
+            label="Owner Name"
+            value={profile.owner_name}
           />
 
           <Info
             icon={<Mail size={16} />}
-            label="Email"
-            value={profile.pharmacist_email}
+            label="Owner Email"
+            value={profile.owner_email}
+          />
+
+          <Info
+            icon={<Phone size={16} />}
+            label="Owner Phone"
+            value={profile.owner_phone}
+          />
+
+          <Info
+            icon={<FileText size={16} />}
+            label="Owner CNIC"
+            value={profile.owner_cnic}
+          />
+
+          <Info
+            icon={<Calendar size={16} />}
+            label="Years In Operation"
+            value={profile.years_in_operation}
           />
 
         </div>
@@ -94,17 +112,17 @@ export default function PharmacistInfoCard({
           <div className="mt-6">
 
             <div className="flex items-center gap-2 mb-3">
-              <FileBadge2
+              <FileText
                 size={18}
                 className="text-blue-600"
               />
 
               <h3 className="font-semibold">
-                Pharmacist License
+                Pharmacy License
               </h3>
             </div>
 
-            {/* PDF FILE */}
+            {/* PDF LICENSE */}
 
             {isPdf ? (
               <button
@@ -123,12 +141,12 @@ export default function PharmacistInfoCard({
               </button>
             ) : (
 
-              /* IMAGE FILE */
+              /* IMAGE LICENSE */
 
               <div className="border rounded-xl overflow-hidden">
                 <img
                   src={licenseUrl}
-                  alt="Pharmacist License"
+                  alt="Pharmacy License"
                   className="
                     w-full
                     h-[350px]
@@ -144,6 +162,7 @@ export default function PharmacistInfoCard({
         )}
 
       </div>
+
     </div>
   );
 }
