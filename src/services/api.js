@@ -91,3 +91,4 @@ export const responseAPI = {
   // Get responses for a prescription (patient side later)
   getByPrescription: (id) => apiCall(`/patient/responses/${id}`),
 };
+

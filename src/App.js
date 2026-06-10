@@ -13,11 +13,10 @@ import Prescription from './pages/prescription/Prescription';
 import PrescriptionResponse from './pages/prescription/PrescriptionResponse';
 import Reservations from './pages/reservations/Reservations';
 import Reviews from './pages/review/Reviews';
-import HelpCenter from './pages/profile/HelpCenter';
-import Notifications from './pages/profile/Notifications';
-import PharmacyProfile from './pages/profile/PharmacyProfile';
-import POSIntegration from './pages/profile/POSIntegrations';
-import Settings from './pages/profile/Settings';
+import Notifications from './pages/pharmacyprofile/Notifications';
+import PharmacyProfile from './pages/pharmacyprofile/PharmacyProfile';
+import POSIntegration from './pages/pos/POSIntegrations';
+import Settings from './pages/pharmacyprofile/Settings';
 import './app.css';
 
 const App = () => {
@@ -42,7 +41,6 @@ const App = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/pos-integration" element={<POSIntegration />} />
             <Route path="/notifications" element={<Notifications />} />
-            <Route path="/help" element={<HelpCenter />} />
         </Routes>
 
 
