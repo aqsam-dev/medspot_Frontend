@@ -28,6 +28,18 @@ const posService = {
     const res = await axios.get(`${API}/history/${pharmacyId}`);
     return res.data;
   },
+
+  saveConnection: async (data) => {
+    const res = await fetch(`${API}/connection`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    return res.json();
+  },
 };
 
 export default posService;

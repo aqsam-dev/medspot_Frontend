@@ -50,6 +50,17 @@ export default function POSIntegrationCard() {
 
     loadData();
   };
+  const handleSaveConnection = async (data) => {
+  await posService.saveConnection({
+    pharmacy_id: pharmacyId,
+    ...data,
+  });
+
+  alert("Connection saved successfully");
+
+  loadData();
+};
+
 
   if (!status) return <div>Loading...</div>;
 
@@ -60,6 +71,7 @@ export default function POSIntegrationCard() {
         status={status}
         onSync={handleSync}
         onTest={handleTestConnection}
+        onSaveConnection={handleSaveConnection}
       />
 
       <SyncStats status={status} />
