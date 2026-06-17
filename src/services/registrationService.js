@@ -164,6 +164,13 @@ async checkUsernameAvailability(username) {
           console.log(`Upload progress: ${percentCompleted}%`);
         },
       });
+      console.log("========== CLOUDINARY RESPONSE ==========");
+console.log(response.data);
+console.log("Resource Type:", response.data.resource_type);
+console.log("Secure URL:", response.data.secure_url);
+console.log("Type:", response.data.type);
+console.log("=========================================");
+
 
       return {
         success: true,
