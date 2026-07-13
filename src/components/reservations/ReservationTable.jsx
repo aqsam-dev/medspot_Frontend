@@ -1,57 +1,116 @@
-export default function ReservationTable() {
-  const data = [
-    {
-      id: "#1098",
-      name: "Aqsam Shahid",
-      qty: "2 Packs",
-      time: "Completed",
-      timeType: "completed",
-      status: "Completed",
-      statusType: "completed",
-    },
-    {
-      id: "#1099",
-      name: "Mahnoor Ijaz",
-      qty: "4 Packs",
-      time: "5 mins left",
-      timeType: "active",
-      status: "Completed",
-      statusType: "completed",
-    },
-    {
-      id: "#2090",
-      name: "Malayka Meer",
-      qty: "13 Packs",
-      time: "Overdue",
-      timeType: "overdue",
-      status: "Pending",
-      statusType: "pending",
-    },
-  ];
+import { useMemo, useState } from "react";
+
+export default function ReservationTable({
+  reservations,
+  loading,
+  page,
+  totalPages,
+  setPage,
+  sort,
+  setSort,
+  lastUpdated,
+}) {
 
   const statusStyles = {
+    active: "bg-blue-50 text-blue-600",
     completed: "bg-green-50 text-green-600",
-    pending: "bg-yellow-50 text-yellow-600",
     expired: "bg-red-50 text-red-600",
   };
 
   const dotStyles = {
+    active: "bg-blue-500",
     completed: "bg-green-500",
-    pending: "bg-yellow-500",
     expired: "bg-red-500",
   };
 
   const timeStyles = {
-    completed: "text-slate-400",
     active: "text-blue-600 font-semibold",
-    overdue: "text-red-500 font-bold",
+    expired: "text-red-600 font-bold",
   };
 
   const timeIcons = {
-    completed: "check_circle",
     active: "timer",
-    overdue: "warning",
+    expired: "warning",
   };
+
+
+  const getRemainingTime = (expiresAt) => {
+
+    const now = new Date();
+
+    const expiry = new Date(expiresAt);
+
+    const diff = expiry - now;
+
+    if (diff <= 0) {
+      return {
+        label: "Expired",
+        type: "expired",
+      };
+    }
+
+    const mins = Math.floor(diff / 60000);
+
+    if (mins < 60) {
+      return {
+        label: `${mins} mins left`,
+        type: "active",
+      };
+    }
+
+    const hrs = Math.floor(mins / 60);
+
+    return {
+      label: `${hrs} hrs left`,
+      type: "active",
+    };
+
+  };
+  if (loading) {
+
+    return (
+
+      <div className="bg-white rounded-2xl p-12 text-center">
+
+        Loading reservations...
+
+      </div>
+
+    );
+
+  }
+
+  if (!loading && reservations.length === 0) {
+
+    return (
+
+      <div className="bg-white rounded-2xl p-12 text-center">
+
+        <span className="material-symbols-outlined text-6xl text-slate-300">
+
+          inbox
+
+        </span>
+
+        <h2 className="mt-4 text-lg font-semibold">
+
+          No Reservations Found
+
+        </h2>
+
+        <p className="text-slate-400 mt-2">
+
+          There are currently no reservations.
+
+        </p>
+
+      </div>
+
+    );
+
+  }
+
+
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -64,7 +123,7 @@ export default function ReservationTable() {
           </h2>
 
           <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-600 rounded uppercase tracking-wider">
-            Update 2m ago
+            Last updated: {lastUpdated}
           </span>
         </div>
 
@@ -74,126 +133,142 @@ export default function ReservationTable() {
           </span>
 
           <div className="flex items-center gap-1 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-xs font-semibold cursor-pointer">
-            Latest Token ID
-            <span className="material-symbols-outlined text-sm">
-              expand_more
-            </span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold"
+            >
+              <option value="latest">Latest Token ID</option>
+              <option value="oldest">Oldest Token ID</option>
+              <option value="expiry">Expiry Time</option>
+            </select>
           </div>
         </div>
-      </div>
-
-      {/* TABLE */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-
-          {/* HEAD */}
-          <thead>
-            <tr className="bg-slate-50/50">
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                Token ID
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider text-center">
-                Quantity
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                Remaining Time
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider text-right">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          {/* BODY */}
-          <tbody className="divide-y divide-slate-100">
-            {data.map((row, i) => (
-              <tr
-                key={i}
-                className="hover:bg-slate-50/50 transition-colors"
-              >
-                <td className="px-6 py-5 text-sm font-bold text-slate-900">
-                  {row.id}
-                </td>
-
-                <td className="px-6 py-5 text-sm font-medium text-slate-700">
-                  {row.name}
-                </td>
-
-                <td className="px-6 py-5 text-sm text-slate-600 text-center">
-                  {row.qty}
-                </td>
-
-                {/* TIME */}
-                <td className="px-6 py-5 text-sm">
-                  <span
-                    className={`flex items-center gap-1.5 ${timeStyles[row.timeType]}`}
-                  >
-                    <span className="material-symbols-outlined text-base">
-                      {timeIcons[row.timeType]}
-                    </span>
-                    {row.time}
-                  </span>
-                </td>
-
-                {/* STATUS */}
-                <td className="px-6 py-5">
-                  <div
-                    className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 w-fit ${statusStyles[row.statusType]}`}
-                  >
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full ${dotStyles[row.statusType]}`}
-                    ></div>
-                    {row.status}
-                  </div>
-                </td>
-
-                {/* ACTION */}
-                <td className="px-6 py-5 text-right">
-                  <button className="text-[11px] font-bold text-blue-600 hover:underline">
-                    Details
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* FOOTER */}
-      <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-        <p className="text-xs text-slate-400 font-medium">
-          Showing 1 to 4 of 45 reservations
-        </p>
-
-        <div className="flex items-center gap-1">
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white">
-            <span className="material-symbols-outlined text-sm">
-              chevron_left
-            </span>
-          </button>
-
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold shadow">
-            1
-          </button>
-
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 text-xs font-bold hover:bg-white">
-            2
-          </button>
-
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white">
-            <span className="material-symbols-outlined text-sm">
-              chevron_right
-            </span>
-          </button>
         </div>
-      </div>
 
-    </div>
-  );
+        {/* TABLE */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+
+            {/* HEAD */}
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Token ID
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider text-center">
+                  Quantity
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Remaining Time
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-wider text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            {/* BODY */}
+            <tbody className="divide-y divide-slate-100">
+              {reservations.map((row) => {
+                const remaining = getRemainingTime(row.expires_at);
+
+                return (
+                  <tr
+                    key={row.reservation_id}
+                    className="hover:bg-slate-50/50 transition-colors"
+                  >
+                    <td className="px-6 py-5 text-sm font-bold text-slate-900">
+                      #{row.reservation_id}
+                    </td>
+
+                    <td className="px-6 py-5 text-sm font-medium text-slate-700">
+                      {row.customer_name}
+                    </td>
+
+                    <td className="px-6 py-5 text-sm text-slate-600 text-center">
+                      {row.total_quantity} Packs
+                    </td>
+
+                    {/* TIME */}
+                    <td className="px-6 py-5 text-sm">
+                      <span
+                        className={`flex items-center gap-1.5 ${timeStyles[remaining.type]}`}
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          {timeIcons[remaining.type]}
+                        </span>
+                        {remaining.label}
+                      </span>
+                    </td>
+
+                    {/* STATUS */}
+                    <td className="px-6 py-5">
+                      <div
+                        className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 w-fit ${statusStyles[row.status]}`}
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${dotStyles[row.status]}`}
+                        ></div>
+                        {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                      </div>
+                    </td>
+
+                    {/* ACTION */}
+                    <td className="px-6 py-5 text-right">
+                      <button
+                        onClick={() => console.log(row)}
+                        className="text-[11px] font-bold text-blue-600 hover:underline"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* FOOTER */}
+        <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
+          <p className="text-xs text-slate-400 font-medium">
+            Showing page {page} of {totalPages}
+          </p>
+
+          <div className="flex gap-2">
+
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className="px-3 py-2 rounded-lg border"
+            >
+              Previous
+            </button>
+
+            <span className="px-4 py-2 font-semibold">
+
+              {page}
+
+            </span>
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              className="px-3 py-2 rounded-lg border"
+            >
+              Next
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+      );
 }

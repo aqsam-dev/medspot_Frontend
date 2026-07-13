@@ -1,30 +1,31 @@
-export default function ReservationStats() {
-  const stats = [
+export default function ReservationStats({ stats }) {
+
+  const cards = [
     {
-      title: "Today's Earnings",
-      value: "PKR 2,556",
-      icon: "payments",
-      type: "blue",
+        title: "Today's Earnings",
+        value: `PKR ${stats.todayRevenue}`,
+        icon: "payments",
+        type: "blue",
     },
     {
-      title: "Active Reservations",
-      value: "07",
-      icon: "assignment",
-      type: "orange",
+        title: "Active Reservations",
+        value: stats.activeReservations,
+        icon: "assignment",
+        type: "orange",
     },
     {
-      title: "Pending Pickup",
-      value: "12",
-      icon: "pending_actions",
-      type: "red", // ✅ match stock (not pink)
+        title: "Pending Pickup",
+        value: stats.pendingReservations,
+        icon: "pending_actions",
+        type: "red",
     },
     {
-      title: "Avg. Processing",
-      value: "14 mins",
-      icon: "schedule",
-      type: "indigo", // ✅ match stock (not purple)
+        title: "Avg. Processing",
+        value: stats.averageProcessingTime,
+        icon: "schedule",
+        type: "indigo",
     },
-  ];
+];
 
   const styles = {
     blue: {
@@ -44,10 +45,15 @@ export default function ReservationStats() {
       text: "text-indigo-600",
     },
   };
+  
+  if (!stats) {
+    return null;
+}
 
   return (
+    
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-      {stats.map((item, i) => {
+      {cards.map((item, i) => {
         const style = styles[item.type];
 
         return (

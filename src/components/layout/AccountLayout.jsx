@@ -40,19 +40,3 @@ export default function AccountLayout({
     </div>
   );
 }
-
-//use example
-// import AccountLayout from "../../layouts/AccountLayout";
-
-// export default function Profile() {
-//   return (
-//     <AccountLayout
-//       headerProps={{
-//         title: "Pharmacy Profile",
-//         subtitle: "Manage pharmacy details",
-//       }}
-//     >
-//       Profile Content
-//     </AccountLayout>
-//   );
-// }

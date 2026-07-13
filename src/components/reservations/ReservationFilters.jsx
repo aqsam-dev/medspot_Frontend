@@ -1,25 +1,30 @@
-export default function ReservationFilters() {
+
+export default function ReservationFilters({ status, setStatus, stats }) {
+
   const filters = [
     {
-      label: "All Orders",
-      count: 45,
+      label: "All",
+      value: "all",
+      count: stats?.totalReservations || 0,
       icon: "list_alt",
-      active: true,
     },
     {
-      label: "Pending",
-      count: 12,
+      label: "Active",
+      value: "active",
+      count: stats?.activeReservations || 0,
       icon: "pending",
     },
     {
-      label: "Confirmed",
-      count: 26,
+      label: "Completed",
+      value: "completed",
+      count: stats?.completedReservations || 0,
       icon: "check_circle",
     },
     {
-      label: "Delivered",
-      count: 7,
-      icon: "local_shipping",
+      label: "Expired",
+      value: "expired",
+      count: stats?.expiredReservations || 0,
+      icon: "warning",
     },
   ];
 
@@ -39,18 +44,16 @@ export default function ReservationFilters() {
           <button
             key={i}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all
-              ${
-                item.active
-                  ? "bg-slate-50 text-slate-900 font-semibold border border-slate-200"
-                  : "text-slate-500 hover:bg-slate-50 font-medium"
+              ${status === item.value
+                ? "bg-slate-50 text-slate-900 font-semibold border border-slate-200"
+                : "text-slate-500 hover:bg-slate-50 font-medium"
               }`}
           >
             {/* LEFT */}
             <div className="flex items-center gap-3">
               <span
-                className={`material-symbols-outlined text-lg ${
-                  item.active ? "text-blue-600" : ""
-                }`}
+                className={`material-symbols-outlined text-lg ${status === item.value ? "text-blue-600" : ""
+                  }`}
               >
                 {item.icon}
               </span>
@@ -60,11 +63,10 @@ export default function ReservationFilters() {
 
             {/* RIGHT COUNT */}
             <span
-              className={`text-xs px-2 py-0.5 rounded-lg ${
-                item.active
+              className={`text-xs px-2 py-0.5 rounded-lg ${status === item.value
                   ? "bg-white border border-slate-200"
                   : "text-slate-400"
-              }`}
+                }`}
             >
               {item.count}
             </span>

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import Sidebar from "../../components/layout/Sidebar";
 import Header from "../../components/layout/Header";
+import socket from "../../services/socketService";
 
 export default function MainLayout({
   children,
@@ -8,11 +9,67 @@ export default function MainLayout({
 }) {
   const [collapsed, setCollapsed] =
     useState(false);
+    useEffect(() => {
+
+    const pharmacy = JSON.parse(
+        localStorage.getItem("pharmacy")
+    );
+
+    if (pharmacy?.pharmacy_id) {
+
+        socket.emit(
+            "registerPharmacy",
+            pharmacy.pharmacy_id
+        );
+
+    }
+
+}, []);
+
+useEffect(() => {
+
+    socket.on(
+        "reservationNotification",
+        (data) => {
+
+            console.log(data);
+
+        }
+    );
+
+    return () => {
+
+        socket.off("reservationNotification");
+
+    };
+
+}, []);
+useEffect(() => {
+
+    socket.on("playSound", () => {
+
+        const audio = new Audio("/notification.mp3");
+
+        audio.play();
+
+    });
+
+    return () => {
+
+        socket.off("playSound");
+
+    };
+
+}, []);
+
+
+
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
       <Sidebar
         collapsed={collapsed}
+
         setCollapsed={setCollapsed}
       />
 
