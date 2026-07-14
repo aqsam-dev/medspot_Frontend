@@ -5,6 +5,8 @@ import Layout from "../../components/layout/MainLayout";
 import ReservationStats from "../../components/reservations/ReservationStats";
 import ReservationTable from "../../components/reservations/ReservationTable";
 import ReservationFilters from "../../components/reservations/ReservationFilters";
+import AddStaffModal from "../../components/staff/AddStaffModal";
+import StaffCard from "../../components/staff/StaffCard";
 
 export default function Reservations() {
 
@@ -61,13 +63,6 @@ useEffect(() => {
         extra: (
           <>
             <button
-              onClick={() => setShowAddStaff(true)}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-semibold shadow-sm"
-            >
-              + Add Staff
-            </button>
-
-            <button
               onClick={() => navigate("/manage-staff")}
               className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition font-semibold text-slate-700"
             >
@@ -78,9 +73,11 @@ useEffect(() => {
       }}
     >
 
- <ReservationStats
-    stats={stats}
-/>
+{stats && (
+    <ReservationStats
+        stats={stats}
+    />
+)}
 
       <div className="flex flex-col lg:flex-row gap-8">
 

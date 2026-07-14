@@ -17,6 +17,7 @@ import Notifications from './pages/pharmacyprofile/Notifications';
 import PharmacyProfile from './pages/pharmacyprofile/PharmacyProfile';
 import POSIntegration from './pages/pos/POSIntegrations';
 import Settings from './pages/pharmacyprofile/Settings';
+import ManageStaff from './pages/reservations/ManageStaff';
 import './app.css';
 
 const App = () => {
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/pos-integration" element={<POSIntegration />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/manage-staff" element={<ManageStaff />} />
         </Routes>
 
 

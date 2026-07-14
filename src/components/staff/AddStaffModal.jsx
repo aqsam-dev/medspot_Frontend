@@ -40,33 +40,67 @@ export default function AddStaffModal({
 
 }, [initialData]);
 
-  function handleChange(e) {
-    const { name, value, type, checked } = e.target;
+function handleChange(e) {
+  const { name, value, type, checked } = e.target;
 
+  if (type === "checkbox") {
     setForm((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox" ? checked : value,
+      [name]: checked,
     }));
+    return;
   }
 
-function handleSubmit(e) {
+  let newValue = value;
+
+  // Validation for WhatsApp number
+  if (name === "whatsapp") {
+    // Only digits
+    newValue = newValue.replace(/\D/g, "");
+
+    // Maximum 11 digits
+    newValue = newValue.slice(0, 11);
+
+    // First digit can only be 0
+    if (newValue.length >= 1 && newValue[0] !== "0") {
+      return;
+    }
+
+    // Second digit must be 3
+    if (newValue.length >= 2 && newValue.substring(0, 2) !== "03") {
+      return;
+    }
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    [name]: newValue,
+  }));
+}
+
+async function handleSubmit(e) {
   e.preventDefault();
 
-  if (
-    !form.full_name.trim() ||
-    !form.phone.trim() ||
-    !form.whatsapp.trim()
-  ) {
-    alert("Please fill all required fields.");
+  if (!form.full_name.trim()) {
+    alert("Please enter full name.");
+    return;
+  }
+
+  if (!form.whatsapp.trim()) {
+    alert("Please enter WhatsApp number.");
+    return;
+  }
+
+  if (!/^03\d{9}$/.test(form.whatsapp)) {
+    alert(
+      "WhatsApp number must start with 03 and contain exactly 11 digits."
+    );
     return;
   }
 
   if (onSave) {
-    onSave(form);
+    await onSave(form);
   }
-
-  onClose();
 }
 
   return (
@@ -137,51 +171,28 @@ function handleSubmit(e) {
               className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option>Salesman</option>
-              <option>Pharmacist</option>
-              <option>Manager</option>
               <option>Cashier</option>
-              <option>Owner</option>
             </select>
           </div>
 
-          {/* PHONE */}
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Phone Number
-            </label>
-
-            <input
-              type="text"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="+92 300 1234567"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
-
           {/* WHATSAPP */}
-
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
               WhatsApp Number
             </label>
-
-            <input
-              type="text"
-              name="whatsapp"
-              value={form.whatsapp}
-              onChange={handleChange}
-              placeholder="+92 300 1234567"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+           <input
+  type="text"
+  name="whatsapp"
+  value={form.whatsapp}
+  onChange={handleChange}
+  inputMode="numeric"
+  maxLength={11}
+  placeholder="03XXXXXXXXX"
+  className="w-full rounded-xl border border-slate-200 px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+/>
           </div>
-
           {/* CHECKBOX */}
-
           <div className="flex items-start gap-3 rounded-xl bg-blue-50 border border-blue-100 p-4">
-
             <input
               type="checkbox"
               name="receive_whatsapp"
@@ -189,25 +200,19 @@ function handleSubmit(e) {
               onChange={handleChange}
               className="mt-1 w-5 h-5 accent-blue-600"
             />
-
             <div>
               <p className="font-semibold text-blue-700">
                 Receive Reservation Alerts
               </p>
-
               <p className="text-sm text-blue-600 mt-1">
                 This staff member will receive
                 WhatsApp notifications whenever
                 a customer reserves medicine.
               </p>
             </div>
-
           </div>
-
           {/* FOOTER */}
-
           <div className="flex justify-end gap-3 pt-4 border-t">
-
             <button
               type="button"
               onClick={onClose}
@@ -215,7 +220,6 @@ function handleSubmit(e) {
             >
               Cancel
             </button>
-
             <button
               type="submit"
               className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
@@ -224,11 +228,8 @@ function handleSubmit(e) {
                 ? "Update Staff"
                 : "Save Staff"}
             </button>
-
-          </div>
-
+        </div>
         </form>
-
       </div>
     </div>
   );
