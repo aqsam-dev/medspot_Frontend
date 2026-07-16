@@ -28,16 +28,28 @@ const [loading, setLoading] = useState(false);
 const [error, setError] = useState("");
 
 
+const token = localStorage.getItem("token");
+
+console.log("TOKEN FROM STORAGE:", token);
+
 const fetchReservations = async () => {
   try {
     setLoading(true);
 
     const res = await fetch(
-      `/api/admin/reservations?page=${page}&status=${status}&search=${search}&sort=${sort}`
+          "http://localhost:5000/api/pharmacy/reservations",
+      {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+
     );
 
+    console.log("STATUS:", res.status);
     const data = await res.json();
-
+    console.log("FULL DATA:", data);
+console.log("RESERVATIONS:", data.reservations);
     setReservations(data.reservations);
     setStats(data.stats);
     setTotalPages(data.totalPages);

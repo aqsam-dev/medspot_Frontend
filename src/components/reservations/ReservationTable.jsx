@@ -6,9 +6,7 @@ export default function ReservationTable({
   page,
   totalPages,
   setPage,
-  sort,
-  setSort,
-  lastUpdated,
+  sort,setSort,lastUpdated,
 }) {
 
   const statusStyles = {
