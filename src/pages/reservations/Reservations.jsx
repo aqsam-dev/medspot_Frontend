@@ -65,6 +65,34 @@ useEffect(() => {
     fetchReservations();
 }, [page, status, search, sort]);
 
+useEffect(() => {
+
+    const refresh = () => {
+
+        console.log(
+            "REFRESHING RESERVATIONS..."
+        );
+
+        fetchReservations();
+    };
+
+    window.addEventListener(
+        "refreshReservations",
+        refresh
+    );
+
+    return () => {
+
+        window.removeEventListener(
+            "refreshReservations",
+            refresh
+        );
+
+    };
+
+}, []);
+
+
   return (
 
     <Layout
