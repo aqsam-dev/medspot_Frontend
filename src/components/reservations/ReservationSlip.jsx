@@ -1,4 +1,6 @@
 import React from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function ReservationSlip({
     data,
@@ -6,34 +8,63 @@ export default function ReservationSlip({
     fetchReservations,
 }) {
     console.log(data);
-
+    const [loading, setLoading] = useState(false);
     if (!data) return null;
-
     const { reservation, items } = data;
     const token = localStorage.getItem("token");
-    const handleComplete = async () => {
-        try {
-            await fetch(
-                `http://localhost:5000/api/pharmacy/reservations/${reservation.reservation_id}/completed`,
-                {
-                    method: "PUT",
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
+const handleComplete = async () => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+        const response = await fetch(
+            `http://localhost:5000/api/pharmacy/reservations/${reservation.reservation_id}/completed`,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            );
-            await fetchReservations();
-            window.dispatchEvent(
-                new Event(
-                    "refreshReservations"
-                )
-            );
-            onClose();
-        } catch (err) {
-            console.log(err);
+            }
+        );
+
+        const result = await response.json();
+
+        console.log(result);
+
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to complete reservation.");
         }
-    };
+
+        // Success notification
+        toast.success("Reservation completed successfully!");
+
+        // Refresh reservation table
+        await fetchReservations();
+
+        // Refresh dashboard widgets if needed
+        window.dispatchEvent(
+            new Event("refreshReservations")
+        );
+
+        // Close slip
+        onClose();
+
+    } catch (err) {
+
+        console.error(err);
+
+        toast.error(
+            err.message || "Something went wrong."
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+};
+
     return (
         <div
             className="
@@ -95,6 +126,7 @@ export default function ReservationSlip({
                         </p>
                     </div>
                     <button
+                        disabled={loading}
                         onClick={
                             onClose
                         }
@@ -405,23 +437,30 @@ export default function ReservationSlip({
 
                         {
                             reservation.status ===
-                                "active" && (
+                            "ACTIVE" && (
 
                                 <button
-                                    onClick={
-                                        handleComplete
-                                    }
-                                    className="
-                                        px-5
-                                        py-2.5
-                                        rounded-xl
-                                        bg-blue-600
-                                        text-white
-                                        font-semibold
-                                        hover:bg-blue-700
-                                    "
+                                    disabled={loading}
+                                    onClick={handleComplete}
+                                    className={`
+    px-5
+    py-2.5
+    rounded-xl
+    text-white
+    font-semibold
+    transition
+
+    ${loading
+                                            ? "bg-slate-400 cursor-not-allowed"
+                                            : "bg-blue-600 hover:bg-blue-700"
+                                        }
+`}
                                 >
-                                    Mark Completed
+                                    {
+                                        loading
+                                            ? "Completing..."
+                                            : "Mark Completed"
+                                    }
                                 </button>
 
                             )

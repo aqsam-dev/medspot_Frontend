@@ -55,66 +55,63 @@ export default function ReservationTable({
 
   };
 
-  const getRemainingTime = (row) => {
+const getRemainingTime = (row) => {
 
-    if (row.status === "completed") {
 
-      return {
-        label: "Completed",
-        type: "completed"
-      };
+  if(row.status === "completed"){
+    return {
+      label:"Completed",
+      type:"completed"
+    };
+  }
 
-    }
 
-    if (row.status === "cancelled") {
+  if(row.status === "cancelled"){
+    return {
+      label:"Cancelled",
+      type:"cancelled"
+    };
+  }
 
-      return {
-        label: "Cancelled",
-        type: "cancelled"
-      };
 
-    }
+  if(row.status === "expired"){
+    return {
+      label:"Expired",
+      type:"expired"
+    };
+  }
 
-    if (row.status === "expired") {
 
-      return {
-        label: "Expired",
-        type: "expired"
-      };
+  // ONLY ACTIVE
 
-    }
+  const expiry = new Date(row.expires_at);
+  const now = new Date();
 
-    // ACTIVE ONLY
+  const diff = expiry - now;
 
-    const now = new Date();
 
-    const expiry = new Date(
-      row.expires_at
-    );
-
-    const diff = expiry - now;
-
-    if (diff <= 0) {
-
-      return {
-        label: "Expired",
-        type: "expired"
-      };
-
-    }
-
-    const mins =
-      Math.floor(diff / 60000);
+  if(diff <= 0){
 
     return {
-
-      label:
-        `${mins} mins left`,
-
-      type: "active"
-
+      label:"Waiting expiry update",
+      type:"active"
     };
+
+  }
+
+
+  const mins =
+  Math.floor(diff / 60000);
+
+
+  return {
+
+    label:`${mins} mins left`,
+    type:"active"
+
   };
+
+};
 
   if (loading) {
 

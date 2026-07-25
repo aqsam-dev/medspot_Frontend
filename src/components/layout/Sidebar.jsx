@@ -8,11 +8,6 @@ const menuItems = [
     path: "/dashboard",
   },
   {
-    name: "Inventory",
-    icon: "inventory_2",
-    path: "/stock",
-  },
-  {
     name: "Reservations",
     icon: "event_note",
     path: "/reservation",
