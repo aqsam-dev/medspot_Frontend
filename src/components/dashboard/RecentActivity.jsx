@@ -89,9 +89,9 @@ export default function RecentActivity({
                                             {activity.message}
                                         </p>
 
-                                        <p className="text-base text-slate-400 mt-1">
-                                            Activity ID: {activity.id}
-                                        </p>
+                                       <p className="text-base text-slate-400 mt-1">
+    Prescription No: {activity.prescription_no || "N/A"}
+</p>
                                     </td>
 
                                     {/* Type */}

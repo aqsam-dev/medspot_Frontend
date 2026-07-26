@@ -24,47 +24,61 @@ export default function Dashboard() {
         fetchDashboard();
     }, []);
 
-    const fetchDashboard = async () => {
-        try {
-            const [
-                statsRes,
-                activityRes,
-                revenueRes
-            ] = await Promise.all([
-                axios.get(
-                    "/api/pharmacy-dashboard/stats"
-                ),
-                axios.get(
-                    "/api/pharmacy-dashboard/recent-activity"
-                ),
-                axios.get(
-                    "/api/pharmacy-dashboard/revenue-chart"
-                ),
-            ]);
-
-            setStats(statsRes.data.stats);
-
-            setActivities(
-                activityRes.data.data
+   const fetchDashboard = async () => {
+    try {
+        const token =
+            localStorage.getItem(
+                "token"
             );
 
-            setRevenueChart(
-                revenueRes.data.data
-            );
+        const config = {
+            headers: {
+                Authorization:
+                    `Bearer ${token}`,
+            },
+        };
 
-        } catch (err) {
+       const [
+    statsRes,
+    activityRes,
+    revenueRes
+] = await Promise.all([
+    axios.get(
+        "http://localhost:5000/api/pharmacy-dashboard/stats",
+        config
+    ),
+    axios.get(
+        "http://localhost:5000/api/pharmacy-dashboard/recent-activity",
+        config
+    ),
+    axios.get(
+        "http://localhost:5000/api/pharmacy-dashboard/revenue-chart",
+        config
+    ),
+]);
 
-            console.log(
-                "Dashboard Error:",
-                err
-            );
+        setStats(
+            statsRes.data.stats
+        );
 
-        } finally {
+        setActivities(
+            activityRes.data.data
+        );
 
-            setLoading(false);
+        setRevenueChart(
+            revenueRes.data.data
+        );
 
-        }
-    };
+    } catch (err) {
+        console.log(
+            "Dashboard Error:",
+            err
+        );
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     return (
         <MainLayout

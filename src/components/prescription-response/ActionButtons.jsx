@@ -1,40 +1,50 @@
+import { useState } from "react";
 import { responseAPI } from "../../services/api";
 
 export default function ActionButtons({
   prescription,
   medicines,
 }) {
+  const [loading, setLoading] =
+    useState(false);
 
-  const validMedicines = medicines.filter(
-    (m) =>
-      m.medicine_name.trim() !== "" &&
-      m.quantity !== "" &&
-      m.price !== ""
-  );
-
-  const isValid = validMedicines.length > 0;
-
-  const getResponseType = () => {
-    const statuses = validMedicines.map(
-      (m) => m.status
+  const validMedicines =
+    medicines.filter(
+      (m) =>
+        m.medicine_name.trim() !== "" &&
+        m.quantity !== "" &&
+        m.price !== ""
     );
 
-    const availableCount = statuses.filter(
-      (s) => s === "available"
-    ).length;
+  const isValid =
+    validMedicines.length > 0;
 
-    const unavailableCount = statuses.filter(
-      (s) => s === "unavailable"
-    ).length;
+  const getResponseType = () => {
+    const statuses =
+      validMedicines.map(
+        (m) => m.status
+      );
+
+    const availableCount =
+      statuses.filter(
+        (s) => s === "available"
+      ).length;
+
+    const unavailableCount =
+      statuses.filter(
+        (s) => s === "unavailable"
+      ).length;
 
     if (
-      availableCount === statuses.length
+      availableCount ===
+      statuses.length
     ) {
       return "ALL";
     }
 
     if (
-      unavailableCount === statuses.length
+      unavailableCount ===
+      statuses.length
     ) {
       return "NONE";
     }
@@ -42,45 +52,74 @@ export default function ActionButtons({
     return "PARTIAL";
   };
 
-  const handleSendResponse = async () => {
-    try {
+  const handleSendResponse =
+    async () => {
+      try {
+        setLoading(true);
 
-      const payload = {
-        prescription_id: prescription.id,
-        pharmacy_id: 1,
-        response_type: getResponseType(),
-        medicines: validMedicines,
-      };
+        const payload = {
+          prescription_id:
+            prescription.id,
 
-      console.log(payload);
+          response_type:
+            getResponseType(),
 
-      const res = await responseAPI.send(payload);
+          medicines:
+            validMedicines,
+        };
 
-      if (res.success) {
-        alert("Response sent successfully");
+        console.log(
+          "Sending Payload:",
+          payload
+        );
+
+        const res =
+          await responseAPI.send(
+            payload
+          );
+
+        if (res.success) {
+          alert(
+            "Response sent successfully"
+          );
+        }
+      } catch (err) {
+        console.error(err);
+
+        alert(
+          "Failed to send response"
+        );
+      } finally {
+        setLoading(false);
       }
-
-    } catch (err) {
-      console.error(err);
-      alert("Failed to send response");
-    }
-  };
+    };
 
   return (
     <div className="flex gap-4">
-
       <button
-        disabled={!isValid}
-        onClick={handleSendResponse}
-        className={`flex-[2] p-3 rounded-xl text-white ${
-          isValid
-            ? "bg-blue-600"
-            : "bg-gray-400 cursor-not-allowed"
-        }`}
+        disabled={
+          !isValid || loading
+        }
+        onClick={
+          handleSendResponse
+        }
+        className={`
+          flex-[2]
+          p-3
+          rounded-xl
+          text-white
+          transition
+          ${
+            isValid && !loading
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-gray-400 cursor-not-allowed"
+          }
+        `}
       >
-        Send Response
+        {loading
+          ? "Sending..."
+          : "Send Response"}
       </button>
-
     </div>
   );
 }

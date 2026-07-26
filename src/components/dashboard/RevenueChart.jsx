@@ -3,109 +3,170 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 export default function RevenueChart({
     revenue = []
 }) {
+
     const maxRevenue = Math.max(
-        ...revenue.map((item) =>
-            Number(item.revenue)
+        ...revenue.map(
+            item => Number(item.revenue)
         ),
         1
     );
 
-    return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100">
 
-            {/* Header */}
-            <div className="flex justify-between items-center mb-5">
-                <h2 className="font-bold flex items-center gap-2 text-2xl">
-                    <BarChartIcon className="text-primary text-2xl" />
-                    Revenue (Last 7 Days)
+    return (
+        <div className="
+            bg-white
+            p-6
+            rounded-2xl
+            border
+            border-slate-100
+            shadow-sm
+        ">
+
+            <div className="
+                flex
+                justify-between
+                items-center
+                mb-8
+            ">
+
+                <h2 className="
+                    font-bold
+                    text-2xl
+                    flex
+                    items-center
+                    gap-2
+                ">
+                    <BarChartIcon className="text-primary" />
+
+                    Revenue
+
+                    <span className="
+                        text-slate-400
+                        text-lg
+                    ">
+                        (Last 7 Days)
+                    </span>
+
                 </h2>
 
-                <span className="text-xs border border-slate-200 rounded-lg px-3 py-1">
-                    {revenue.length} Days
+
+                <span className="
+                    text-xs
+                    bg-slate-100
+                    px-3
+                    py-2
+                    rounded-lg
+                    font-bold
+                    text-slate-500
+                ">
+                    7 Days
                 </span>
+
             </div>
 
-            {/* Empty State */}
-            {revenue.length === 0 ? (
-                <div className="h-36 flex items-center justify-center text-slate-400">
-                    No revenue data available.
-                </div>
-            ) : (
-                <>
-                    {/* Bars */}
-                    <div className="flex items-end justify-between h-44 gap-2">
 
-                        {revenue.map(
-                            (item, index) => {
-                                const value =
-                                    Number(
-                                        item.revenue
+            {
+                revenue.length === 0 ? (
+
+                    <div className="
+                        h-40
+                        flex
+                        items-center
+                        justify-center
+                        text-slate-400
+                    ">
+                        No revenue data
+                    </div>
+
+                ) : (
+
+                    <div className="
+                        flex
+                        items-end
+                        justify-between
+                        h-64
+                        gap-4
+                    ">
+
+                        {
+                            revenue.map(
+                                (item, index) => {
+
+                                    const height = Math.max(
+                                        (
+                                            Number(item.revenue) /
+                                            maxRevenue
+                                        ) * 100,
+                                        5
                                     );
 
-                                const height =
-                                    (value /
-                                        maxRevenue) *
-                                    100;
 
-                                return (
-                                    <div
-                                        key={
-                                            item.date
-                                        }
-                                        className="
-                                            flex
-                                            flex-col
-                                            items-center
-                                            flex-1
-                                        "
-                                    >
-                                        {/* Revenue Amount */}
-                                        <span className="text-[10px] text-slate-500 mb-1">
-                                            Rs {value}
-                                        </span>
+                                    return (
 
-                                        {/* Bar */}
                                         <div
-                                            className={`
-                                                w-full
-                                                rounded-t-lg
-                                                transition-all
-                                                cursor-pointer
-                                                ${
-                                                    index ===
-                                                    revenue.length -
-                                                        1
-                                                        ? "bg-primary shadow-md shadow-blue-500/20"
-                                                        : "bg-primary/50 hover:bg-primary/70"
-                                                }
-                                            `}
-                                            style={{
-                                                height: `${height}%`,
-                                                minHeight:
-                                                    "10px",
-                                            }}
-                                        />
+                                            key={index}
+                                            className="
+                                                flex
+                                                flex-col
+                                                items-center
+                                                gap-2
+                                                flex-1
+                                                h-full
+                                                justify-end
+                                            "
+                                        >
 
-                                        {/* Date */}
-                                        <span className="text-[10px] text-slate-400 font-semibold tracking-widest mt-2">
-                                            {new Date(
-                                                item.date
-                                            ).toLocaleDateString(
-                                                "en-US",
+                                            <span className="
+                                                text-xs
+                                                text-slate-500
+                                            ">
+                                                Rs {Number(item.revenue).toLocaleString()}
+                                            </span>
+
+
+                                            <div
+                                                className="
+                                                    w-full
+                                                    bg-primary
+                                                    rounded-t-lg
+                                                    transition-all
+                                                    duration-300
+                                                "
+                                                style={{
+                                                    height: `${height}%`
+                                                }}
+                                            />
+
+
+                                            <span className="
+                                                text-[10px]
+                                                text-slate-400
+                                            ">
                                                 {
-                                                    month:
-                                                        "short",
-                                                    day: "numeric",
+                                                    new Date(item.date)
+                                                        .toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                                month: "short",
+                                                                day: "numeric"
+                                                            }
+                                                        )
                                                 }
-                                            )}
-                                        </span>
-                                    </div>
-                                );
-                            }
-                        )}
+                                            </span>
+
+                                        </div>
+
+                                    );
+
+                                }
+                            )
+                        }
+
                     </div>
-                </>
-            )}
+
+                )
+            }
+
         </div>
     );
 }
