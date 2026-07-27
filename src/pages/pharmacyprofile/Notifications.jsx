@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Bell,
   Calendar,
@@ -9,49 +10,87 @@ import {
 import AccountLayout from "../../components/layout/AccountLayout";
 
 export default function Notifications() {
-  const notifications = [
-    {
-      id: 1,
-      title: "New Reservation Received",
-      description:
-        "A patient has reserved Augmentin 625mg.",
-      time: "2 minutes ago",
-      icon: Bell,
-      color: "text-blue-600",
-      bg: "bg-blue-100",
-    },
-    {
-      id: 2,
-      title: "Inventory Synced",
-      description:
-        "POS inventory synchronized successfully.",
-      time: "10 minutes ago",
-      icon: Package,
-      color: "text-green-600",
-      bg: "bg-green-100",
-    },
-    {
-      id: 3,
-      title: "Reservation Cancelled",
-      description:
-        "A reservation was cancelled by the patient.",
-      time: "25 minutes ago",
-      icon: XCircle,
-      color: "text-red-600",
-      bg: "bg-red-100",
-    },
-    {
-      id: 4,
-      title: "Prescription Approved",
-      description:
-        "Prescription #104 has been approved.",
-      time: "1 hour ago",
-      icon: Calendar,
-      color: "text-purple-600",
-      bg: "bg-purple-100",
-    },
-  ];
+const [notifications, setNotifications] = useState([]);
 
+useEffect(() => {
+  fetchNotifications();
+}, []);
+
+const fetchNotifications = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/notifications"
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      setNotifications(data.notifications);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getIconData = (type) => {
+  switch (type) {
+    case "reservation":
+      return {
+        icon: Bell,
+        color: "text-blue-600",
+        bg: "bg-blue-100",
+      };
+
+    case "reservation_completed":
+      return {
+        icon: Package,
+        color: "text-green-600",
+        bg: "bg-green-100",
+      };
+
+    case "reservation_cancelled":
+      return {
+        icon: XCircle,
+        color: "text-red-600",
+        bg: "bg-red-100",
+      };
+
+    case "prescription":
+      return {
+        icon: Calendar,
+        color: "text-purple-600",
+        bg: "bg-purple-100",
+      };
+
+    case "review":
+      return {
+        icon: Bell,
+        color: "text-yellow-600",
+        bg: "bg-yellow-100",
+      };
+
+    case "staff_added":
+      return {
+        icon: Bell,
+        color: "text-indigo-600",
+        bg: "bg-indigo-100",
+      };
+
+    case "staff_removed":
+      return {
+        icon: XCircle,
+        color: "text-red-600",
+        bg: "bg-red-100",
+      };
+
+    default:
+      return {
+        icon: Bell,
+        color: "text-gray-600",
+        bg: "bg-gray-100",
+      };
+  }
+};
   return (
     <AccountLayout
       headerProps={{
@@ -78,7 +117,12 @@ export default function Notifications() {
 
         <div className="bg-white rounded-2xl shadow border overflow-hidden">
           {notifications.map((item) => {
-            const Icon = item.icon;
+
+  const {
+    icon: Icon,
+    color,
+    bg,
+  } = getIconData(item.type);
 
             return (
               <div
@@ -96,12 +140,12 @@ export default function Notifications() {
                     className={`
                       w-12 h-12 rounded-xl
                       flex items-center justify-center
-                      ${item.bg}
+                      ${bg}
                     `}
                   >
                     <Icon
                       size={22}
-                      className={item.color}
+                      className={color}
                     />
                   </div>
 
@@ -111,11 +155,11 @@ export default function Notifications() {
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-1">
-                      {item.description}
+                      {item.message}
                     </p>
 
                     <p className="text-xs text-gray-400 mt-2">
-                      {item.time}
+                      {new Date(item.created_at).toLocaleString()}
                     </p>
                   </div>
                 </div>

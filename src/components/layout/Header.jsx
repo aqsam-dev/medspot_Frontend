@@ -30,26 +30,8 @@ export default function Header({
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark"
   );
-
-  const unreadNotifications = 3;
-
-  const notifications = [
-    {
-      id: 1,
-      title: "Prescription #104 approved",
-      time: "2 min ago",
-    },
-    {
-      id: 2,
-      title: "Inventory synced successfully",
-      time: "10 min ago",
-    },
-    {
-      id: 3,
-      title: "New reservation received",
-      time: "25 min ago",
-    },
-  ];
+const [notifications, setNotifications] = useState([]);
+const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     document.documentElement.classList.toggle(
@@ -62,6 +44,69 @@ export default function Header({
       darkMode ? "dark" : "light"
     );
   }, [darkMode]);
+
+  useEffect(() => {
+
+  async function fetchNotifications(){
+
+    try{
+
+      const token =
+      localStorage.getItem("token");
+
+
+      const response =
+      await fetch(
+        "http://localhost:5000/api/notifications",
+        {
+          headers:{
+            Authorization:
+            `Bearer ${token}`
+          }
+        }
+      );
+
+
+      const result =
+      await response.json();
+
+
+      if(result.success){
+
+        // show only latest 3 in dropdown
+        setNotifications(
+          result.data.slice(0,3)
+        );
+
+
+        const unread =
+        result.data.filter(
+          (item)=>item.is_read === false
+        ).length;
+
+
+        setUnreadNotifications(unread);
+
+      }
+
+
+    }
+    catch(error){
+
+      console.log(
+        "Notification Error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  fetchNotifications();
+
+
+}, []);
 
   useEffect(() => {
     function handleOutsideClick() {
@@ -161,15 +206,15 @@ export default function Header({
                 {notifications.length > 0 ? (
                   notifications.map((item) => (
                     <div
-                      key={item.id}
+                      key={item.notification_id}
                       className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
                     >
                       <p className="text-sm font-medium">
-                        {item.title}
+                        {item.message}
                       </p>
 
                       <p className="text-xs text-gray-500 mt-1">
-                        {item.time}
+                        {new Date(item.created_at).toLocaleString()}
                       </p>
                     </div>
                   ))
