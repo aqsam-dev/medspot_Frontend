@@ -1,32 +1,62 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// Generic API call function for JSON requests
-const apiCall = async (endpoint, method = 'GET', data = null) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+const apiCall = async (
+  endpoint,
+  method = "GET",
+  data = null
+) => {
+  const url =
+    `${API_BASE_URL}${endpoint}`;
 
-  const config = { method, headers: {} };
+  const token =
+    localStorage.getItem("token");
 
-  // Only set Content-Type for JSON body
+  const config = {
+    method,
+    headers: {},
+  };
+
+  // Send token for protected backend routes
+  if (token) {
+    config.headers.Authorization =
+      `Bearer ${token}`;
+  }
+
+  // Do not manually set Content-Type for FormData
   if (!(data instanceof FormData)) {
-    config.headers['Content-Type'] = 'application/json';
+    config.headers["Content-Type"] =
+      "application/json";
   }
 
-  if (data && method !== 'GET') {
-    config.body = data instanceof FormData ? data : JSON.stringify(data);
+  if (
+    data &&
+    method !== "GET"
+  ) {
+    config.body =
+      data instanceof FormData
+        ? data
+        : JSON.stringify(data);
   }
+
+  const response =
+    await fetch(url, config);
+
+  let result = {};
 
   try {
-    const response = await fetch(url, config);
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Something went wrong');
-    }
-
-    return result;
-  } catch (error) {
-    throw error;
+    result = await response.json();
+  } catch {
+    result = {};
   }
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ||
+      `Request failed: ${response.status}`
+    );
+  }
+
+  return result;
 };
 
 // -------------------------
