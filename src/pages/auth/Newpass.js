@@ -1,7 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { authAPI } from "../../services/api";
-import "./Newpass.css"; // Add this import
+import "./Newpass.css"; 
+import toast from 'react-hot-toast';
 
 // ✅ EYE ICONS (unchanged)
 const EyeOpenIcon = () => (
@@ -128,8 +129,8 @@ const Newpass = () => {
       localStorage.removeItem('resetEmail');
       localStorage.removeItem('resetToken');
       
-      alert('Password changed successfully! You can now login with your new password.');
-      navigate('/');
+      toast.success(  "Password changed successfully! You can now login with your new password.");
+navigate("/");
       
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
@@ -138,6 +139,7 @@ const Newpass = () => {
                           'Failed to reset password';
       
       setErrors({ general: errorMessage });
+      toast.error(errorMessage);
       
       console.error('Password reset error:', error);
     } finally {

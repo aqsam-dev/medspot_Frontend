@@ -18,17 +18,37 @@ useEffect(() => {
 
 const fetchNotifications = async () => {
   try {
+    const token = localStorage.getItem("token");
+
     const response = await fetch(
-      "http://localhost:5000/api/notifications"
+      "http://localhost:5000/api/notifications",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
 
     const data = await response.json();
 
-    if (data.success) {
-      setNotifications(data.notifications);
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        "Failed to fetch notifications."
+      );
     }
+
+    if (data.success) {
+      setNotifications(data.data || []);
+    }
+
   } catch (err) {
-    console.log(err);
+    console.error(
+      "Notification fetch error:",
+      err
+    );
+
+    setNotifications([]);
   }
 };
 
@@ -126,7 +146,7 @@ const getIconData = (type) => {
 
             return (
               <div
-                key={item.id}
+                key={item.notification_id}
                 className="
                   flex items-center justify-between
                   p-5 border-b last:border-b-0

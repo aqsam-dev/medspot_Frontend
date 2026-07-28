@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import registrationService from "../../services/registrationService";
 import './StepLoginFiles.css';
+import toast from "react-hot-toast";
 
 // Eye Icons
 const EyeOpenIcon = () => (
@@ -190,30 +191,49 @@ const StepLoginFiles = () => {
 
     setUploading(true);
 
-    try {
-      const payload = await registrationService.formatForBackend();
-      const res = await fetch('http://localhost:5000/api/pharmacy/register', { 
-        method: 'POST', 
-        body: payload 
-      });
-      
-      const json = await res.json();
+try {
+  const payload =
+    await registrationService.formatForBackend();
 
-      if (!res.ok) {
-        alert('Error: ' + (json?.message || 'Registration failed'));
-        setUploading(false);
-        return;
-      }
-
-      registrationService.clearAll();
-      alert('Registration successful! Please sign in.');
-      navigate('/');
-    } catch (err) {
-      console.error('Network error:', err);
-      alert('Network error: Could not reach server.');
-    } finally {
-      setUploading(false);
+  const res = await fetch(
+    "http://localhost:5000/api/pharmacy/register",
+    {
+      method: "POST",
+      body: payload,
     }
+  );
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    toast.error(
+      json?.message ||
+        "Registration failed."
+    );
+
+    setUploading(false);
+    return;
+  }
+
+  registrationService.clearAll();
+
+  toast.success(
+    "Registration successful! Please sign in."
+  );
+
+  navigate("/");
+} catch (err) {
+  console.error(
+    "Network error:",
+    err
+  );
+
+  toast.error(
+    "Network error: Could not reach server."
+  );
+} finally {
+  setUploading(false);
+}
   };
 
   return (

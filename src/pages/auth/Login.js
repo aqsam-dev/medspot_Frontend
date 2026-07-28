@@ -3,6 +3,8 @@ import { useState } from "react";
 import { pharmacyAPI } from "../../services/api";
 import Lottie from "lottie-react"; // ✅ Import Lottie
 import animationData from "../../assets/doctorwelcome.json"; 
+import toast from 'react-hot-toast';
+
 
 // Eye Icons
 const EyeOpenIcon = () => (
@@ -106,11 +108,12 @@ const Login = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('pharmacyData', JSON.stringify(response.pharmacy));
 
-      setErrors({ success: 'Login successful! Redirecting...' });
+      toast.success("Login successful!");
       setTimeout(() => navigate('/dashboard'), 1000);
 
     } catch (error) {
-      setErrors({ general: error.message });
+      setErrors({ general: error.message || "Login Failed "});
+      toast.error(error.message || "Login Failed ")
     } finally {
       setIsLoading(false);
     }
@@ -168,10 +171,6 @@ const Login = () => {
                   </div>
                   {errors.password && <span className="error-text">{errors.password}</span>}
                 </div>
-
-                {/* Messages */}
-                {errors.success && <div className="success-message">{errors.success}</div>}
-                {errors.general && <div className="error-general">{errors.general}</div>}
 
                 {/* LOGIN BUTTON */}
                 <button 

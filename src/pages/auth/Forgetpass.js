@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { authAPI } from "../../services/api"
-import "./Forgetpass.css"; // Add this import
+import "./Forgetpass.css";
+import toast from 'react-hot-toast';
+
 
 const Forgetpass = () => {
   const navigate = useNavigate();
@@ -11,37 +13,53 @@ const Forgetpass = () => {
   const [success, setSuccess] = useState(false);
   
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    const trimmedEmail = email.trim();
-    // ... validation
-    
-    setIsLoading(true);
-    
-    try {
-      // ✅ Get response which includes resetToken
-      const response = await authAPI.forgotPassword({ email: trimmedEmail });
-      
-      // ✅ Store resetToken in localStorage
-      localStorage.setItem('resetToken', response.resetToken);
-      
-      alert('OTP sent to your email');
-      
-      // ✅ Pass both email AND resetToken to OTP page
-      navigate('/otp', { 
-        state: { 
-          email: trimmedEmail,
-          resetToken: response.resetToken 
-        } 
-      });
-      
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  e.preventDefault();
 
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    setError("Email address is required.");
+    toast.error("Email address is required.");
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const response =
+      await authAPI.forgotPassword({
+        email: trimmedEmail,
+      });
+
+    localStorage.setItem(
+      "resetToken",
+      response.resetToken
+    );
+
+    toast.success(
+      "OTP sent to your email."
+    );
+
+    navigate("/otp", {
+      state: {
+        email: trimmedEmail,
+        resetToken:
+          response.resetToken,
+      },
+    });
+
+  } catch (error) {
+    const message =
+      error.message ||
+      "Failed to send OTP.";
+
+    setError(message);
+    toast.error(message);
+
+  } finally {
+    setIsLoading(false);
+  }
+};
   return(
     <div className="main-container">
       <div className="card">

@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { authAPI } from "../../services/api";
 import "./Otp.css";
+import toast from "react-hot-toast";
 
 const Otp = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const Otp = () => {
         setResetToken(storedToken);
       } else {
         setError("Session expired. Please restart the process.");
+toast.error("Session expired. Please restart the process.");
         setTimeout(() => navigate('/forgetpass'), 3000);
       }
     }
@@ -152,6 +154,7 @@ const Otp = () => {
     
     if (!resetToken) {
       setError("Reset token not found. Please restart the process.");
+toast.error("Reset token not found. Please restart the process.");
       return;
     }
     
@@ -159,6 +162,7 @@ const Otp = () => {
     const isOtpComplete = otp.every(digit => digit !== '');
     if (!isOtpComplete) {
       setError("Please enter all 6 digits");
+toast.error("Please enter all 6 digits.");
       
       // Highlight empty inputs
       otp.forEach((digit, index) => {
@@ -180,6 +184,7 @@ const Otp = () => {
     // Double-check length
     if (otpString.length !== 6) {
       setError("OTP must be exactly 6 digits");
+toast.error("OTP must be exactly 6 digits.");
       return;
     }
     
@@ -203,9 +208,9 @@ const Otp = () => {
         setResetToken(response.resetToken);
       }
       
-      // Navigate to next page with email
+      toast.success("OTP verified successfully.");
       navigate('/newpass', { 
-        state: { email: email } 
+        state: { email: email } ,
       });
       
     } catch (error) {
@@ -217,6 +222,7 @@ const Otp = () => {
                           'Verification failed';
       
       setError(errorMessage);
+toast.error(errorMessage);
       
     } finally {
       setIsLoading(false);
@@ -227,11 +233,13 @@ const Otp = () => {
   const handleResendOtp = async () => {
     if (!resetToken) {
       setError("Cannot resend: reset token not found");
+toast.error("Cannot resend: reset token not found.");
       return;
     }
     
     if (timer > 0) {
-      setError(`Please wait ${timer} seconds before resending`);
+     setError(`Please wait ${timer} seconds before resending`);
+toast.error(`Please wait ${timer} seconds before resending.`);
       return;
     }
     
@@ -256,6 +264,7 @@ const Otp = () => {
       }, 10);
       
       setError('New OTP sent! Check your email.');
+toast.success("A new OTP has been sent to your email.");
       
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
@@ -263,6 +272,7 @@ const Otp = () => {
                           error.message || 
                           'Failed to resend OTP';
       setError(errorMessage);
+toast.error(errorMessage);
     } finally {
       setIsResending(false);
     }
