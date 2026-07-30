@@ -2,7 +2,7 @@ import axios from 'axios';
 
 class RegistrationService {
   constructor() {
-    // In-memory data (may include File objects)
+
     this.pharmacyData = this.getStoredPharmacyData();
     this.pharmacistData = this.getStoredPharmacistData();
     this.isInternalNavigation = false; // Tracks internal navigation state
@@ -13,47 +13,32 @@ class RegistrationService {
     };
   }
 
-  // Inside your RegistrationService class in RegistrationService.js
 
 async checkEmailAvailability(email) {
   try {
-    // Replace with your actual backend URL (e.g., http://localhost:5000)
-    const BACKEND_URL = "http://localhost:5000/api/check-email"; 
-    
+    const BACKEND_URL = "http://localhost:5000/api/pharmacy/check-email"; 
     const response = await axios.get(`${BACKEND_URL}/check-email`, {
       params: { email: email.toLowerCase() }
     });
-
-    // Your backend returns { available: true/false }
     return response.data.available;
   } catch (error) {
     console.error("Availability check failed:", error);
-    // Return true by default so we don't block the user if the server has a hiccup
     return true; 
   }
 }
 
 async checkCNICAvailability(cnic) {
   try {
-    // Backend URL (same base as email check)
-    const BACKEND_URL = "http://localhost:5000/api/check-cnic";
-
+    const BACKEND_URL = "http://localhost:5000/api/pharmacy/check-cnic";
     const response = await axios.get(`${BACKEND_URL}/check-cnic`, {
       params: { cnic }
     });
-
-    // Your backend returns { available: true/false }
     return response.data.available;
-
   } catch (error) {
     console.error("CNIC availability check failed:", error);
-
-    // Return true so UI doesn't block user on server error
     return true;
   }
 }
-
-// Inside RegistrationService class in RegistrationService.js
 
 async checkUsernameAvailability(username) {
   try {
@@ -68,7 +53,6 @@ async checkUsernameAvailability(username) {
 }
 
 
-  // ========== INTERNAL NAVIGATION ==========
   setInternalNav(value) {
     this.isInternalNavigation = value;
   }
@@ -77,7 +61,6 @@ async checkUsernameAvailability(username) {
     return this.isInternalNavigation;
   }
 
-  // ========== PHARMACY DATA ==========
   getStoredPharmacyData() {
     return JSON.parse(localStorage.getItem('pharmacyData')) || {};
   }
@@ -103,7 +86,6 @@ async checkUsernameAvailability(username) {
     localStorage.removeItem('pharmacyData');
   }
 
-  // ========== PHARMACIST DATA ==========
   getStoredPharmacistData() {
     return JSON.parse(localStorage.getItem('pharmacistData')) || {};
   }
@@ -129,21 +111,17 @@ async checkUsernameAvailability(username) {
     localStorage.removeItem('pharmacistData');
   }
 
-  // ========== CLOUDINARY UPLOAD METHODS ==========
   async uploadFileToCloudinary(file, folder = 'pharmacy_registration') {
     try {
-      // Validate file
       if (!file || !(file instanceof File)) {
         throw new Error('Invalid file');
       }
 
-      // Check file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         throw new Error(`File size exceeds 5MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
       }
 
-      // Check file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
         throw new Error('Only JPG, PNG, or PDF files are allowed');
@@ -164,12 +142,12 @@ async checkUsernameAvailability(username) {
           console.log(`Upload progress: ${percentCompleted}%`);
         },
       });
-      console.log("========== CLOUDINARY RESPONSE ==========");
-console.log(response.data);
-console.log("Resource Type:", response.data.resource_type);
-console.log("Secure URL:", response.data.secure_url);
-console.log("Type:", response.data.type);
-console.log("=========================================");
+      //       console.log("========== CLOUDINARY RESPONSE ==========");
+      // console.log(response.data);
+      // console.log("Resource Type:", response.data.resource_type);
+      // console.log("Secure URL:", response.data.secure_url);
+      // console.log("Type:", response.data.type);
+      // console.log("=========================================");
 
 
       return {
@@ -189,7 +167,7 @@ console.log("=========================================");
     }
   }
 
-  // Upload both licenses to Cloudinary
+
   async uploadLicensesToCloudinary() {
     const results = {
       pharmacyLicense: null,
@@ -233,7 +211,7 @@ console.log("=========================================");
     return results;
   }
 
-  // ========== MERGED DATA ==========
+
   getAllData() {
     return {
       pharmacy: this.getData(),
@@ -241,35 +219,26 @@ console.log("=========================================");
     };
   }
 
-  // ========== FORM DATA FOR BACKEND ==========
+
   async formatForBackend() {
     try {
-      // Upload files to Cloudinary first
       const uploadResults = await this.uploadLicensesToCloudinary();
-      
-      // Now create form data with Cloudinary URLs
       const formData = new FormData();
-
-      // Pharmacy
       const pharmacy = this.getData() || {};
       formData.append("owner_name", pharmacy.ownerName || "");
       formData.append("owner_email", pharmacy.ownerEmail || "");
       formData.append("owner_phone", pharmacy.ownerPhone || "");
       formData.append("owner_cnic", pharmacy.ownerCNIC || "");
       formData.append("pharmacy_name", pharmacy.pharmacyName || "");
-      
-      // Use Cloudinary URL if available, otherwise empty string
       if (pharmacy.licenseUrl) {
         formData.append("license_url", pharmacy.licenseUrl);
         console.log('Using Cloudinary URL for pharmacy license:', pharmacy.licenseUrl);
       } else if (pharmacy.license instanceof File) {
-        // Fallback: send file directly if Cloudinary upload failed
         formData.append("license_url", pharmacy.license, pharmacy.license.name);
         console.log('Using direct file upload for pharmacy license');
       } else {
         formData.append("license_url", "");
-      }
-      
+      } 
       formData.append("years_in_operation", pharmacy.yearsOperation || 0);
       formData.append("province", pharmacy.province || "");
       formData.append("city", pharmacy.city || "");
@@ -289,20 +258,17 @@ console.log("=========================================");
       formData.append("pharmacist_qualification", pharmacist.qualification || "");
       formData.append("pharmacist_cnic", pharmacist.cnic || "");
       formData.append("pharmacist_email", pharmacist.email || "");
-      
-      // Use Cloudinary URL if available, otherwise empty string
+    
       if (pharmacist.licenseUrl) {
         formData.append("pharmacist_license_url", pharmacist.licenseUrl);
         console.log('Using Cloudinary URL for pharmacist license:', pharmacist.licenseUrl);
       } else if (pharmacist.license instanceof File) {
-        // Fallback: send file directly if Cloudinary upload failed
         formData.append("pharmacist_license_url", pharmacist.license, pharmacist.license.name);
         console.log('Using direct file upload for pharmacist license');
       } else {
         formData.append("pharmacist_license_url", "");
       }
 
-      // Add upload results metadata
       if (uploadResults.pharmacyLicense) {
         formData.append("pharmacy_license_public_id", uploadResults.pharmacyLicense.publicId || "");
         formData.append("pharmacy_license_format", uploadResults.pharmacyLicense.format || "");
@@ -366,14 +332,12 @@ console.log("=========================================");
     return formData;
   }
 
-  // ========== CLEAR ALL DATA ==========
   clearAll() {
     this.clearPharmacyData();
     this.clearPharmacistData();
     this.isInternalNavigation = false;
   }
 
-  // ========== STEP TRACKING ==========
   setCurrentStep(step) {
     localStorage.setItem('currentStep', step);
   }
@@ -386,7 +350,6 @@ console.log("=========================================");
     localStorage.removeItem('currentStep');
   }
 
-  // ========== NAVIGATION LOGIC ==========
   canNavigateToStep(targetStep, currentStep, validateCallback) {
     if (targetStep < currentStep) {
       // Always allow going back
@@ -406,7 +369,6 @@ console.log("=========================================");
     return { allowed: true, reason: 'same' };
   }
 
-  // ========== FILE VALIDATION ==========
   validateFile(file) {
     const errors = [];
     
@@ -431,6 +393,6 @@ console.log("=========================================");
   }
 }
 
-// Export singleton
+
 const registrationService = new RegistrationService();
 export default registrationService;

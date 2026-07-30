@@ -1,13 +1,9 @@
 import { useState } from "react";
+import pharmacyProfileService from "../../services/pharmacyprofileservice";
 
-import pharmacyProfileService
-from "../../services/pharmacyprofileservice";
-
-const emailDomains = [
-  "gmail.com",
-  "yahoo.com",
-  "hotmail.com",
-  "icloud.com"
+const qualifications = [
+  { value: "bpharm", label: "B-Pharm" },
+  { value: "mpharm", label: "M-Pharm" }
 ];
 
 export default function EditPharmacistModal({
@@ -15,282 +11,489 @@ export default function EditPharmacistModal({
   onClose,
   onSuccess
 }) {
-
   const [loading, setLoading] =
     useState(false);
 
   const [errors, setErrors] =
     useState({});
 
+  const [submitError, setSubmitError] =
+    useState("");
+
   const [formData, setFormData] =
     useState({
-      full_name:
+      pharmacist_name:
         profile.pharmacist_name || "",
 
       qualification:
         profile.qualification || "",
 
-      cnic:
+      pharmacist_cnic:
         profile.pharmacist_cnic || "",
 
-      email:
+      pharmacist_email:
         profile.pharmacist_email || ""
     });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const clearFieldError = (field) => {
+    setErrors((previous) => {
+      const updated = {
+        ...previous
+      };
 
-    if (name === "full_name") {
+      delete updated[field];
+
+      return updated;
+    });
+  };
+
+  const handleChange = (event) => {
+    const {
+      name,
+      value
+    } = event.target;
+
+    setSubmitError("");
+    clearFieldError(name);
+
+    if (name === "pharmacist_name") {
       const cleaned = value
         .replace(/[^A-Za-z ]/g, "")
-        .slice(0, 20);
+        .replace(/\s{2,}/g, " ")
+        .slice(0, 50);
 
-      setFormData(prev => ({
-        ...prev,
-        full_name: cleaned
+      setFormData((previous) => ({
+        ...previous,
+        pharmacist_name: cleaned
       }));
 
       return;
     }
 
-    if (name === "cnic") {
-
+    if (name === "pharmacist_cnic") {
       const digits = value
         .replace(/\D/g, "")
         .slice(0, 13);
 
       let formatted = digits;
 
-      if (digits.length > 5)
+      if (digits.length > 5) {
         formatted =
-          digits.slice(0, 5) +
-          "-" +
-          digits.slice(5);
+          `${digits.slice(0, 5)}-${digits.slice(5)}`;
+      }
 
-      if (digits.length > 12)
+      if (digits.length > 12) {
         formatted =
-          digits.slice(0, 5) +
-          "-" +
-          digits.slice(5, 12) +
-          "-" +
-          digits.slice(12);
+          `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+      }
 
-      setFormData(prev => ({
-        ...prev,
-        cnic: formatted
+      setFormData((previous) => ({
+        ...previous,
+        pharmacist_cnic: formatted
       }));
 
       return;
     }
 
-    setFormData(prev => ({
-      ...prev,
+    if (name === "pharmacist_email") {
+      setFormData((previous) => ({
+        ...previous,
+        pharmacist_email:
+          value.trimStart().toLowerCase()
+      }));
+
+      return;
+    }
+
+    setFormData((previous) => ({
+      ...previous,
       [name]: value
     }));
   };
 
   const validate = () => {
+    const validationErrors = {};
 
-    const e = {};
+    const pharmacistName =
+      formData.pharmacist_name.trim();
 
-    if (
-      !/^[A-Za-z ]{3,20}$/.test(
-        formData.full_name
-      )
-    ) {
-      e.full_name =
-        "3-20 letters only";
-    }
+    const pharmacistEmail =
+      formData.pharmacist_email.trim();
 
     if (
-      !/^\d{5}-\d{7}-\d{1}$/.test(
-        formData.cnic
+      !/^[A-Za-z ]{3,50}$/.test(
+        pharmacistName
       )
     ) {
-      e.cnic =
-        "Invalid CNIC";
-    }
-
-    if (
-      !/^.+@(gmail|yahoo|hotmail|icloud)\.com$/.test(
-        formData.email
-      )
-    ) {
-      e.email =
-        "Invalid Email";
+      validationErrors.pharmacist_name =
+        "Name must contain 3 to 50 letters only.";
     }
 
     if (!formData.qualification) {
-      e.qualification =
-        "Required";
+      validationErrors.qualification =
+        "Please select a qualification.";
     }
 
-    return e;
+    if (
+      !/^\d{5}-\d{7}-\d$/.test(
+        formData.pharmacist_cnic
+      )
+    ) {
+      validationErrors.pharmacist_cnic =
+        "Enter CNIC in 12345-1234567-1 format.";
+    }
+
+    if (
+      !/^[A-Za-z0-9._%+-]+@(gmail|yahoo|hotmail|icloud)\.com$/i.test(
+        pharmacistEmail
+      )
+    ) {
+      validationErrors.pharmacist_email =
+        "Enter a valid Gmail, Yahoo, Hotmail, or iCloud email.";
+    }
+
+    return validationErrors;
   };
 
   const handleSubmit = async () => {
+    const validationErrors =
+      validate();
 
-    const e = validate();
-
-    setErrors(e);
+    setErrors(validationErrors);
+    setSubmitError("");
 
     if (
-      Object.keys(e).length
-    ) return;
+      Object.keys(
+        validationErrors
+      ).length > 0
+    ) {
+      return;
+    }
 
     try {
-
       setLoading(true);
 
-      await pharmacyProfileService
-        .updatePharmacist(
+      const payload = {
+        pharmacist_name:
+          formData.pharmacist_name.trim(),
+
+        qualification:
+          formData.qualification,
+
+        pharmacist_cnic:
+          formData.pharmacist_cnic.trim(),
+
+        pharmacist_email:
+          formData.pharmacist_email
+            .trim()
+            .toLowerCase()
+      };
+
+      const response =
+        await pharmacyProfileService.updatePharmacistInfo(
           profile.pharmacy_id,
-          formData
+          payload
         );
 
+      if (
+        response?.success === false
+      ) {
+        throw new Error(
+          response.message ||
+            "Failed to update pharmacist information."
+        );
+      }
+
       onSuccess();
+    } catch (error) {
+      console.error(
+        "Update Pharmacist Error:",
+        error.response?.data ||
+          error.message
+      );
 
-    } catch (err) {
-
-      console.error(err);
-
+      setSubmitError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update pharmacist information."
+      );
     } finally {
-
       setLoading(false);
-
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-
-      <div className="bg-white rounded-2xl w-full max-w-2xl p-6">
-
-        <h2 className="text-xl font-semibold mb-6">
-          Edit Pharmacist
+    <div
+      className="
+        fixed inset-0 z-50
+        flex items-center justify-center
+        bg-black/50 p-4
+      "
+    >
+      <div
+        className="
+          max-h-[90vh]
+          w-full max-w-2xl
+          overflow-auto
+          rounded-2xl
+          bg-white p-6
+        "
+      >
+        <h2 className="mb-6 text-xl font-semibold">
+          Edit Pharmacist Information
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-4">
-
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label>
+            <label
+              htmlFor="pharmacist_name"
+              className="mb-2 block text-sm font-medium"
+            >
               Full Name
             </label>
 
             <input
-              name="full_name"
-              value={formData.full_name}
+              id="pharmacist_name"
+              name="pharmacist_name"
+              type="text"
+              value={
+                formData.pharmacist_name
+              }
               onChange={handleChange}
-              className="w-full border rounded-xl p-3"
+              disabled={loading}
+              placeholder="Enter pharmacist name"
+              className={`
+                w-full rounded-xl border p-3
+                outline-none
+                disabled:bg-gray-100
+                ${
+                  errors.pharmacist_name
+                    ? "border-red-500"
+                    : "focus:border-blue-500"
+                }
+              `}
             />
 
-            {errors.full_name &&
-              <p className="text-red-500 text-sm">
-                {errors.full_name}
+            {errors.pharmacist_name && (
+              <p className="mt-1 text-sm text-red-500">
+                {
+                  errors.pharmacist_name
+                }
               </p>
-            }
+            )}
           </div>
 
           <div>
-            <label>
+            <label
+              htmlFor="qualification"
+              className="mb-2 block text-sm font-medium"
+            >
               Qualification
             </label>
 
             <select
+              id="qualification"
               name="qualification"
-              value={formData.qualification}
+              value={
+                formData.qualification
+              }
               onChange={handleChange}
-              className="w-full border rounded-xl p-3"
+              disabled={loading}
+              className={`
+                w-full rounded-xl border p-3
+                outline-none
+                disabled:bg-gray-100
+                ${
+                  errors.qualification
+                    ? "border-red-500"
+                    : "focus:border-blue-500"
+                }
+              `}
             >
               <option value="">
-                Select
+                Select qualification
               </option>
 
-              <option value="bpharm">
-                B-Pharm
-              </option>
-
-              <option value="mpharm">
-                M-Pharm
-              </option>
+              {qualifications.map(
+                (qualification) => (
+                  <option
+                    key={
+                      qualification.value
+                    }
+                    value={
+                      qualification.value
+                    }
+                  >
+                    {
+                      qualification.label
+                    }
+                  </option>
+                )
+              )}
             </select>
+
+            {errors.qualification && (
+              <p className="mt-1 text-sm text-red-500">
+                {
+                  errors.qualification
+                }
+              </p>
+            )}
           </div>
 
           <div>
-            <label>
+            <label
+              htmlFor="pharmacist_cnic"
+              className="mb-2 block text-sm font-medium"
+            >
               CNIC
             </label>
 
             <input
-              name="cnic"
-              value={formData.cnic}
+              id="pharmacist_cnic"
+              name="pharmacist_cnic"
+              type="text"
+              value={
+                formData.pharmacist_cnic
+              }
               onChange={handleChange}
-              className="w-full border rounded-xl p-3"
+              disabled={loading}
+              placeholder="12345-1234567-1"
+              className={`
+                w-full rounded-xl border p-3
+                outline-none
+                disabled:bg-gray-100
+                ${
+                  errors.pharmacist_cnic
+                    ? "border-red-500"
+                    : "focus:border-blue-500"
+                }
+              `}
             />
+
+            {errors.pharmacist_cnic && (
+              <p className="mt-1 text-sm text-red-500">
+                {
+                  errors.pharmacist_cnic
+                }
+              </p>
+            )}
           </div>
 
           <div>
-            <label>
+            <label
+              htmlFor="pharmacist_email"
+              className="mb-2 block text-sm font-medium"
+            >
               Email
             </label>
 
             <input
-              name="email"
-              value={formData.email}
+              id="pharmacist_email"
+              name="pharmacist_email"
+              type="email"
+              value={
+                formData.pharmacist_email
+              }
               onChange={handleChange}
-              className="w-full border rounded-xl p-3"
+              disabled={loading}
+              placeholder="pharmacist@gmail.com"
+              className={`
+                w-full rounded-xl border p-3
+                outline-none
+                disabled:bg-gray-100
+                ${
+                  errors.pharmacist_email
+                    ? "border-red-500"
+                    : "focus:border-blue-500"
+                }
+              `}
             />
-          </div>
 
+            {errors.pharmacist_email && (
+              <p className="mt-1 text-sm text-red-500">
+                {
+                  errors.pharmacist_email
+                }
+              </p>
+            )}
+          </div>
         </div>
 
         {profile.pharmacist_license && (
           <div className="mt-6">
-
-            <label className="block mb-2">
-              Current License
+            <label className="mb-2 block text-sm font-medium">
+              Current Pharmacist License
             </label>
 
-            <img
-              src={profile.pharmacist_license}
-              alt=""
-              className="
-                h-64
-                w-full
-                object-contain
-                border
-                rounded-xl
-              "
-            />
+            <div className="rounded-xl border bg-gray-50 p-3">
+              <img
+                src={
+                  profile.pharmacist_license
+                }
+                alt="Pharmacist license"
+                className="
+                  h-64 w-full
+                  rounded-lg
+                  object-contain
+                "
+              />
+
+              <p className="mt-2 text-sm text-gray-500">
+                The uploaded license cannot be changed.
+              </p>
+            </div>
           </div>
         )}
 
-        <div className="flex justify-end gap-3 mt-6">
+        {submitError && (
+          <div
+            className="
+              mt-4 rounded-xl
+              border border-red-200
+              bg-red-50
+              px-4 py-3
+              text-sm text-red-600
+            "
+          >
+            {submitError}
+          </div>
+        )}
 
+        <div className="mt-6 flex justify-end gap-3">
           <button
+            type="button"
             onClick={onClose}
-            className="border px-4 py-2 rounded-xl"
+            disabled={loading}
+            className="
+              rounded-xl border
+              px-4 py-2
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
           >
             Cancel
           </button>
 
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={loading}
             className="
-              bg-blue-600
-              text-white
-              px-4 py-2
               rounded-xl
+              bg-blue-600
+              px-4 py-2
+              text-white
+              disabled:cursor-not-allowed
+              disabled:opacity-60
             "
           >
-            Save Changes
+            {loading
+              ? "Saving..."
+              : "Save Changes"}
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 }

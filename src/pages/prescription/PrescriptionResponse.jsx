@@ -32,7 +32,7 @@ async()=>{
 
         const response=
         await axios.get(
-            `http://localhost:5000/api/patient/prescriptions/${prescription.id}/medicines`
+            `http://localhost:5000/api/pharmacy/prescriptions/${prescription.id}/medicines`
         );
 const rows = response.data.data
 .sort((a, b) => {

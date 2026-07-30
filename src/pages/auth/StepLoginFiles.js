@@ -4,7 +4,6 @@ import registrationService from "../../services/registrationService";
 import './StepLoginFiles.css';
 import toast from "react-hot-toast";
 
-// Eye Icons
 const EyeOpenIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -56,8 +55,6 @@ const StepLoginFiles = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ color: '#ef4444', width: '0%' });
   const [uploading, setUploading] = useState(false);
-
-  // Username availability states
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // 'available' | 'taken'
 
@@ -82,7 +79,7 @@ const StepLoginFiles = () => {
     registrationService.setInternalNav(false);
   }, []);
 
-  // 🎯 REAL-TIME USERNAME CHECK LOGIC
+
   useEffect(() => {
     if (!formData.username || formData.username.length < 3) {
       setUsernameStatus(null);
@@ -91,13 +88,11 @@ const StepLoginFiles = () => {
     }
 
     const checkUsername = async () => {
-      // Start checking
       setIsCheckingUsername(true);
       setUsernameStatus(null); 
 
       try {
         const isAvailable = await registrationService.checkUsernameAvailability(formData.username);
-        // Only update if the current username in the field still matches the one we checked
         setUsernameStatus(isAvailable ? 'available' : 'taken');
       } catch (err) {
         console.error("Check failed", err);
@@ -107,7 +102,7 @@ const StepLoginFiles = () => {
       }
     };
 
-    const timeoutId = setTimeout(checkUsername, 500); // 500ms debounce
+    const timeoutId = setTimeout(checkUsername, 500); 
     return () => clearTimeout(timeoutId);
   }, [formData.username]);
 
@@ -126,11 +121,8 @@ const StepLoginFiles = () => {
 
     if (name === 'username') {
       const cleaned = value.replace(/[^A-Za-z]/g, '').slice(0, 20);
-      
-      // Reset status immediately on every change/paste
       setUsernameStatus(null);
       if (cleaned.length >= 3) setIsCheckingUsername(true);
-      
       setFormData(prev => ({ ...prev, username: cleaned }));
       registrationService.updateData({ username: cleaned });
     } else if (name === 'password') {
@@ -142,7 +134,6 @@ const StepLoginFiles = () => {
       if (value.length > 30) return;
       setFormData(prev => ({ ...prev, confirmPassword: value }));
     }
-
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 

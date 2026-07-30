@@ -1,136 +1,147 @@
-const API = "http://localhost:5000/api/pharmacy-profile";
+const API_URL = "http://localhost:5000/api/pharmacy-profile";
+
+async function handleResponse(response) {
+  const data = await response.json();
+
+  if (!response.ok || data.success === false) {
+    throw new Error(
+      data.message || "Request failed"
+    );
+  }
+
+  return data;
+}
 
 const pharmacyProfileService = {
-  // ==========================
-  // GET FULL PROFILE
-  // ==========================
-  async getProfile(id) {
-    const res = await fetch(
-      `${API}/profile/${id}`
+  getProfile: async (pharmacyId) => {
+    const response = await fetch(
+      `${API_URL}/profile/${pharmacyId}`
     );
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch profile");
-    }
-
-    const data = await res.json();
+    const data = await handleResponse(response);
 
     return data.pharmacy;
   },
 
-  // ==========================
-  // CARD 1
-  // BASIC INFO
-  // ==========================
-  async updateBasicInfo(id, payload) {
-    const res = await fetch(
-      `${API}/basic-info/${id}`,
+  updateBasicInfo: async (
+    pharmacyId,
+    formData
+  ) => {
+    const response = await fetch(
+      `${API_URL}/basic-info/${pharmacyId}`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(formData),
       }
     );
 
-    return await res.json();
+    return handleResponse(response);
   },
 
-  // ==========================
-  // CARD 2
-  // ADDRESS & LOCATION
-  // ==========================
-  async updateAddress(id, payload) {
-    const res = await fetch(
-      `${API}/address/${id}`,
+  updateAddress: async (
+    pharmacyId,
+    formData
+  ) => {
+    const response = await fetch(
+      `${API_URL}/address/${pharmacyId}`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(formData),
       }
     );
 
-    return await res.json();
+    return handleResponse(response);
   },
 
-  // ==========================
-  // CARD 3
-  // OPERATING HOURS
-  // ==========================
-  async updateOperatingHours(id, payload) {
-    const res = await fetch(
-      `${API}/operating-hours/${id}`,
+  updateOperatingHours: async (
+    pharmacyId,
+    operatingHours
+  ) => {
+    const response = await fetch(
+      `${API_URL}/operating-hours/${pharmacyId}`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          operating_hours: operatingHours,
+        }),
       }
     );
 
-    return await res.json();
+    return handleResponse(response);
   },
 
-  // ==========================
-  // CARD 4
-  // PHARMACIST INFO
-  // ==========================
-  async updatePharmacist(id, payload) {
-    const res = await fetch(
-      `${API}/pharmacist/${id}`,
+  updatePharmacistInfo: async (
+    pharmacyId,
+    formData
+  ) => {
+    const response = await fetch(
+      `${API_URL}/pharmacist/${pharmacyId}`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(formData),
       }
     );
 
-    return await res.json();
+    return handleResponse(response);
   },
 
-  // ==========================
-  // CARD 5
-  // USERNAME
-  // ==========================
-  async changeUsername(payload) {
-    const res = await fetch(
-      `${API}/change-username`,
+  changeUsername: async ({
+    pharmacyId,
+    currentPassword,
+    newUsername,
+  }) => {
+    const response = await fetch(
+      `${API_URL}/change-username`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          pharmacy_id: pharmacyId,
+          currentPassword,
+          newUsername,
+        }),
       }
     );
 
-    return await res.json();
+    return handleResponse(response);
   },
 
-  // ==========================
-  // CARD 5
-  // PASSWORD
-  // ==========================
-  async changePassword(payload) {
-    const res = await fetch(
-      `${API}/change-password`,
+  changePassword: async ({
+    pharmacyId,
+    currentPassword,
+    newPassword,
+  }) => {
+    const response = await fetch(
+      `${API_URL}/change-password`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          pharmacy_id: pharmacyId,
+          currentPassword,
+          newPassword,
+        }),
       }
     );
 
-    return await res.json();
-  }
+    return handleResponse(response);
+  },
 };
 
 export default pharmacyProfileService;

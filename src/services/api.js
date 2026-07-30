@@ -79,9 +79,9 @@ export const adminAPI = {
 // AUTH API
 // -------------------------
 export const authAPI = {
-  forgotPassword: (data) => apiCall('/auth/forgot-password', 'POST', data),
-  verifyOtp: (data) => apiCall('/auth/verify-otp', 'POST', data),
-  resetPassword: (data) => apiCall('/auth/reset-password', 'POST', data),
+  forgotPassword: (data) => apiCall('/pharmacy/forgot-password', 'POST', data),
+  verifyOtp: (data) => apiCall('/pharmacy/verify-otp', 'POST', data),
+  resetPassword: (data) => apiCall('/pharmacy/reset-password', 'POST', data),
 };
 
 // -------------------------
@@ -105,10 +105,10 @@ export const uploadFile = async (endpoint, file) => {
 // -------------------------
 export const prescriptionAPI = {
   // Get all prescriptions (for queue)
-  getAll: () => apiCall('/patient/prescriptions'),
+  getAll: () => apiCall('/pharmacy/prescriptions'),
 
   // Get single prescription
-  getById: (id) => apiCall(`/patient/prescriptions/${id}`),
+  getById: (id) => apiCall(`/pharmacy/prescriptions/${id}`),
 };
 
 
@@ -116,9 +116,9 @@ export const prescriptionAPI = {
 // RESPONSE API (PHARMACY SIDE)
 // -------------------------
 export const responseAPI = {
-  send: (data) => apiCall('/patient/responses', 'POST', data),
+  send: (data) => apiCall('/pharmacy/prescriptions', 'POST', data),
 
   // Get responses for a prescription (patient side later)
-  getByPrescription: (id) => apiCall(`/patient/responses/${id}`),
+  getByPrescription: (id) => apiCall(`/pharmacy/responses/${id}`),
 };
 
