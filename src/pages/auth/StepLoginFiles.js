@@ -59,11 +59,6 @@ const StepLoginFiles = () => {
   const [usernameStatus, setUsernameStatus] = useState(null); // 'available' | 'taken'
 
   useEffect(() => {
-    const internal = registrationService.getInternalNav();
-    if (!internal) {
-      registrationService.clearAll();
-    }
-
     const pharmacy = registrationService.getData() || {};
     const pharmacist = registrationService.getPharmacistData() || {};
 

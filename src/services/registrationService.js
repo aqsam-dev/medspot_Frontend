@@ -16,7 +16,7 @@ class RegistrationService {
 
 async checkEmailAvailability(email) {
   try {
-    const BACKEND_URL = "http://localhost:5000/api/pharmacy/check-email"; 
+    const BACKEND_URL = "http://localhost:5000/api/pharmacy"; 
     const response = await axios.get(`${BACKEND_URL}/check-email`, {
       params: { email: email.toLowerCase() }
     });
@@ -29,7 +29,7 @@ async checkEmailAvailability(email) {
 
 async checkCNICAvailability(cnic) {
   try {
-    const BACKEND_URL = "http://localhost:5000/api/pharmacy/check-cnic";
+    const BACKEND_URL = "http://localhost:5000/api/pharmacy";
     const response = await axios.get(`${BACKEND_URL}/check-cnic`, {
       params: { cnic }
     });
@@ -224,7 +224,11 @@ async checkUsernameAvailability(username) {
     try {
       const uploadResults = await this.uploadLicensesToCloudinary();
       const formData = new FormData();
-      const pharmacy = this.getData() || {};
+          const pharmacy = {
+      ...this.getStoredPharmacyData(),
+      ...this.getData(),
+    };
+
       formData.append("owner_name", pharmacy.ownerName || "");
       formData.append("owner_email", pharmacy.ownerEmail || "");
       formData.append("owner_phone", pharmacy.ownerPhone || "");
@@ -253,7 +257,10 @@ async checkUsernameAvailability(username) {
       formData.append("password", pharmacy.password || "");
 
       // Pharmacist
-      const pharmacist = this.getPharmacistData() || {};
+          const pharmacist = {
+      ...this.getStoredPharmacistData(),
+      ...this.getPharmacistData(),
+    };
       formData.append("pharmacist_full_name", pharmacist.fullName || "");
       formData.append("pharmacist_qualification", pharmacist.qualification || "");
       formData.append("pharmacist_cnic", pharmacist.cnic || "");
